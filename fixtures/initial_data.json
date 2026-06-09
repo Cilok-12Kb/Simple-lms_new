@@ -1,0 +1,2564 @@
+[
+{
+  "model": "courses.user",
+  "fields": {
+    "password": "pbkdf2_sha256$600000$uxo9zBefMqnVID3YXXWYPu$GQAoVBv2Lie+tLH2DrxgQ2076k7Ayx6O1DIijX7lNG4=",
+    "last_login": null,
+    "is_superuser": true,
+    "username": "admin",
+    "first_name": "",
+    "last_name": "",
+    "email": "admin@lms.com",
+    "is_staff": true,
+    "is_active": true,
+    "date_joined": "2026-06-01T12:17:17.261Z",
+    "role": "student",
+    "bio": "",
+    "avatar": "",
+    "groups": [],
+    "user_permissions": []
+  }
+},
+{
+  "model": "courses.user",
+  "fields": {
+    "password": "pbkdf2_sha256$600000$uRlyc9AkKkN1D96EpLeLQX$12bJyAyTcJplP600ZQad7yrsZAw8n3u52I6f+SxDQpg=",
+    "last_login": null,
+    "is_superuser": false,
+    "username": "budi_instructor",
+    "first_name": "Budi",
+    "last_name": "Santoso",
+    "email": "budi@lms.com",
+    "is_staff": false,
+    "is_active": true,
+    "date_joined": "2026-06-01T12:21:26.450Z",
+    "role": "instructor",
+    "bio": "",
+    "avatar": "",
+    "groups": [],
+    "user_permissions": []
+  }
+},
+{
+  "model": "courses.user",
+  "fields": {
+    "password": "pbkdf2_sha256$600000$yLy6e4AxFFrPhX5awq8da7$VLSgncvKSDidqYm4bZUfoNtEgbbg9bgnPVNFVY/JLMg=",
+    "last_login": null,
+    "is_superuser": false,
+    "username": "sari_instructor",
+    "first_name": "Sari",
+    "last_name": "Dewi",
+    "email": "sari@lms.com",
+    "is_staff": false,
+    "is_active": true,
+    "date_joined": "2026-06-01T12:21:26.538Z",
+    "role": "instructor",
+    "bio": "",
+    "avatar": "",
+    "groups": [],
+    "user_permissions": []
+  }
+},
+{
+  "model": "courses.user",
+  "fields": {
+    "password": "pbkdf2_sha256$600000$obTtwSzK83BzfErPWoF0aU$1d5jsFWfa3/gELrtAdFRHnpEveZ5LGB+4q5XCCsEGvM=",
+    "last_login": null,
+    "is_superuser": false,
+    "username": "andi_instructor",
+    "first_name": "Andi",
+    "last_name": "Wijaya",
+    "email": "andi@lms.com",
+    "is_staff": false,
+    "is_active": true,
+    "date_joined": "2026-06-01T12:21:26.616Z",
+    "role": "instructor",
+    "bio": "",
+    "avatar": "",
+    "groups": [],
+    "user_permissions": []
+  }
+},
+{
+  "model": "courses.user",
+  "fields": {
+    "password": "pbkdf2_sha256$600000$4pYiOGuKoPA1LQWSK53G4t$wVK1xMIlXdzogrFJjFoj+p3MZ0XnLn1szwkiF26kO2k=",
+    "last_login": null,
+    "is_superuser": false,
+    "username": "student_01",
+    "first_name": "Siswa",
+    "last_name": "01",
+    "email": "student1@lms.com",
+    "is_staff": false,
+    "is_active": true,
+    "date_joined": "2026-06-01T12:21:26.695Z",
+    "role": "student",
+    "bio": "",
+    "avatar": "",
+    "groups": [],
+    "user_permissions": []
+  }
+},
+{
+  "model": "courses.user",
+  "fields": {
+    "password": "pbkdf2_sha256$600000$h44E7cGU5LnsV3Y9NCKn9q$R7b07Hy7suhX6jXy6mp/RrSN8XDa5RJ1CiTvRYpz9ZI=",
+    "last_login": null,
+    "is_superuser": false,
+    "username": "student_02",
+    "first_name": "Siswa",
+    "last_name": "02",
+    "email": "student2@lms.com",
+    "is_staff": false,
+    "is_active": true,
+    "date_joined": "2026-06-01T12:21:26.774Z",
+    "role": "student",
+    "bio": "",
+    "avatar": "",
+    "groups": [],
+    "user_permissions": []
+  }
+},
+{
+  "model": "courses.user",
+  "fields": {
+    "password": "pbkdf2_sha256$600000$zawXwhdZcPlT4LjFNIfipV$Ze7xGIKDbXKvqfnIF+olgrlSsu2URQKWQeKu7XvocJM=",
+    "last_login": null,
+    "is_superuser": false,
+    "username": "student_03",
+    "first_name": "Siswa",
+    "last_name": "03",
+    "email": "student3@lms.com",
+    "is_staff": false,
+    "is_active": true,
+    "date_joined": "2026-06-01T12:21:26.855Z",
+    "role": "student",
+    "bio": "",
+    "avatar": "",
+    "groups": [],
+    "user_permissions": []
+  }
+},
+{
+  "model": "courses.user",
+  "fields": {
+    "password": "pbkdf2_sha256$600000$qZU0wde5QLdD5AL93owyKU$egJkjgxiOYFT1Va6sUIKGZCZJP0rH2AiPOU6pfRNTRI=",
+    "last_login": null,
+    "is_superuser": false,
+    "username": "student_04",
+    "first_name": "Siswa",
+    "last_name": "04",
+    "email": "student4@lms.com",
+    "is_staff": false,
+    "is_active": true,
+    "date_joined": "2026-06-01T12:21:26.936Z",
+    "role": "student",
+    "bio": "",
+    "avatar": "",
+    "groups": [],
+    "user_permissions": []
+  }
+},
+{
+  "model": "courses.user",
+  "fields": {
+    "password": "pbkdf2_sha256$600000$g0YfocaRwIJuDgiemgrwgm$uFbFVP87FGbY1NkK+UM5iOMrVPeA2eCKF5Ca/p8tgcE=",
+    "last_login": null,
+    "is_superuser": false,
+    "username": "student_05",
+    "first_name": "Siswa",
+    "last_name": "05",
+    "email": "student5@lms.com",
+    "is_staff": false,
+    "is_active": true,
+    "date_joined": "2026-06-01T12:21:27.017Z",
+    "role": "student",
+    "bio": "",
+    "avatar": "",
+    "groups": [],
+    "user_permissions": []
+  }
+},
+{
+  "model": "courses.user",
+  "fields": {
+    "password": "pbkdf2_sha256$600000$H9BzbNYc2Sox1wFbUw68RY$tOqI176Z25/7+ugaigxbhH3yayde3XRQk+V9enJm7tg=",
+    "last_login": null,
+    "is_superuser": false,
+    "username": "student_06",
+    "first_name": "Siswa",
+    "last_name": "06",
+    "email": "student6@lms.com",
+    "is_staff": false,
+    "is_active": true,
+    "date_joined": "2026-06-01T12:21:27.097Z",
+    "role": "student",
+    "bio": "",
+    "avatar": "",
+    "groups": [],
+    "user_permissions": []
+  }
+},
+{
+  "model": "courses.user",
+  "fields": {
+    "password": "pbkdf2_sha256$600000$m44GMtww2SXzyItNDbSzL2$wHex0fm4uXwfo5a22hULkkTSc7fOxrn1oJa9NQsi7v0=",
+    "last_login": null,
+    "is_superuser": false,
+    "username": "student_07",
+    "first_name": "Siswa",
+    "last_name": "07",
+    "email": "student7@lms.com",
+    "is_staff": false,
+    "is_active": true,
+    "date_joined": "2026-06-01T12:21:27.177Z",
+    "role": "student",
+    "bio": "",
+    "avatar": "",
+    "groups": [],
+    "user_permissions": []
+  }
+},
+{
+  "model": "courses.user",
+  "fields": {
+    "password": "pbkdf2_sha256$600000$kYjRu6YqGqvSOiuufaykVt$72w4VPPYHkb5bqiMVkDvM5vrpIjk6IA33hvkBr1VcNg=",
+    "last_login": null,
+    "is_superuser": false,
+    "username": "student_08",
+    "first_name": "Siswa",
+    "last_name": "08",
+    "email": "student8@lms.com",
+    "is_staff": false,
+    "is_active": true,
+    "date_joined": "2026-06-01T12:21:27.257Z",
+    "role": "student",
+    "bio": "",
+    "avatar": "",
+    "groups": [],
+    "user_permissions": []
+  }
+},
+{
+  "model": "courses.user",
+  "fields": {
+    "password": "pbkdf2_sha256$600000$QLhDMzNNTGdO3pEx8FZYFK$RAl35C+omIa3/mQMf9KRlCUOij+/LWqG4nWDGtoiKg4=",
+    "last_login": null,
+    "is_superuser": false,
+    "username": "student_09",
+    "first_name": "Siswa",
+    "last_name": "09",
+    "email": "student9@lms.com",
+    "is_staff": false,
+    "is_active": true,
+    "date_joined": "2026-06-01T12:21:27.339Z",
+    "role": "student",
+    "bio": "",
+    "avatar": "",
+    "groups": [],
+    "user_permissions": []
+  }
+},
+{
+  "model": "courses.user",
+  "fields": {
+    "password": "pbkdf2_sha256$600000$B9dbAlM1uO92MUqVlgDyI9$GFItEIV+CkyXTFGKtmiHFUWxkrmuGmbFmqGpntCU/5o=",
+    "last_login": null,
+    "is_superuser": false,
+    "username": "student_10",
+    "first_name": "Siswa",
+    "last_name": "10",
+    "email": "student10@lms.com",
+    "is_staff": false,
+    "is_active": true,
+    "date_joined": "2026-06-01T12:21:27.419Z",
+    "role": "student",
+    "bio": "",
+    "avatar": "",
+    "groups": [],
+    "user_permissions": []
+  }
+},
+{
+  "model": "courses.category",
+  "pk": 1,
+  "fields": {
+    "name": "Pemrograman",
+    "slug": "programming",
+    "description": "Semua tentang coding",
+    "parent": null,
+    "created_at": "2026-06-01T12:21:27.500Z"
+  }
+},
+{
+  "model": "courses.category",
+  "pk": 2,
+  "fields": {
+    "name": "Desain",
+    "slug": "design",
+    "description": "UI/UX dan desain grafis",
+    "parent": null,
+    "created_at": "2026-06-01T12:21:27.502Z"
+  }
+},
+{
+  "model": "courses.category",
+  "pk": 3,
+  "fields": {
+    "name": "Web Development",
+    "slug": "web-development",
+    "description": "Pengembangan web frontend dan backend",
+    "parent": 1,
+    "created_at": "2026-06-01T12:21:27.503Z"
+  }
+},
+{
+  "model": "courses.category",
+  "pk": 4,
+  "fields": {
+    "name": "Backend Development",
+    "slug": "backend-development",
+    "description": "Server-side development",
+    "parent": 3,
+    "created_at": "2026-06-01T12:21:27.506Z"
+  }
+},
+{
+  "model": "courses.category",
+  "pk": 5,
+  "fields": {
+    "name": "Data Science",
+    "slug": "data-science",
+    "description": "Analisis data dan machine learning",
+    "parent": 1,
+    "created_at": "2026-06-01T12:21:27.508Z"
+  }
+},
+{
+  "model": "courses.course",
+  "pk": 1,
+  "fields": {
+    "title": "Python untuk Pemula",
+    "slug": "python-pemula",
+    "description": "Belajar Python dari nol sampai bisa membuat program sederhana.",
+    "thumbnail": "",
+    "instructor": [
+      "budi_instructor"
+    ],
+    "category": 3,
+    "level": "beginner",
+    "price": "150000.00",
+    "is_published": true,
+    "created_at": "2026-06-01T12:21:27.513Z",
+    "updated_at": "2026-06-01T12:21:27.513Z"
+  }
+},
+{
+  "model": "courses.course",
+  "pk": 2,
+  "fields": {
+    "title": "Django Web Framework",
+    "slug": "django-web-framework",
+    "description": "Membangun aplikasi web dengan Django, ORM, dan REST API.",
+    "thumbnail": "",
+    "instructor": [
+      "budi_instructor"
+    ],
+    "category": 4,
+    "level": "intermediate",
+    "price": "250000.00",
+    "is_published": true,
+    "created_at": "2026-06-01T12:21:27.516Z",
+    "updated_at": "2026-06-01T12:21:27.516Z"
+  }
+},
+{
+  "model": "courses.course",
+  "pk": 3,
+  "fields": {
+    "title": "Docker & DevOps Dasar",
+    "slug": "docker-devops-dasar",
+    "description": "Containerization dengan Docker dan Docker Compose.",
+    "thumbnail": "",
+    "instructor": [
+      "sari_instructor"
+    ],
+    "category": 4,
+    "level": "intermediate",
+    "price": "200000.00",
+    "is_published": true,
+    "created_at": "2026-06-01T12:21:27.519Z",
+    "updated_at": "2026-06-01T12:21:27.519Z"
+  }
+},
+{
+  "model": "courses.course",
+  "pk": 4,
+  "fields": {
+    "title": "Data Analysis dengan Pandas",
+    "slug": "data-analysis-pandas",
+    "description": "Analisis data menggunakan Python Pandas dan Matplotlib.",
+    "thumbnail": "",
+    "instructor": [
+      "andi_instructor"
+    ],
+    "category": 5,
+    "level": "beginner",
+    "price": "175000.00",
+    "is_published": true,
+    "created_at": "2026-06-01T12:21:27.521Z",
+    "updated_at": "2026-06-01T12:21:27.521Z"
+  }
+},
+{
+  "model": "courses.course",
+  "pk": 5,
+  "fields": {
+    "title": "React.js Modern",
+    "slug": "reactjs-modern",
+    "description": "Frontend development dengan React Hooks dan modern tooling.",
+    "thumbnail": "",
+    "instructor": [
+      "sari_instructor"
+    ],
+    "category": 3,
+    "level": "intermediate",
+    "price": "220000.00",
+    "is_published": false,
+    "created_at": "2026-06-01T12:21:27.523Z",
+    "updated_at": "2026-06-01T12:21:27.523Z"
+  }
+},
+{
+  "model": "courses.lesson",
+  "pk": 1,
+  "fields": {
+    "course": 1,
+    "title": "Pengenalan Python",
+    "content_type": "video",
+    "content": "Konten pelajaran: Pengenalan Python",
+    "video_url": null,
+    "duration_minutes": 15,
+    "order": 0,
+    "is_free_preview": true,
+    "created_at": "2026-06-01T12:21:27.528Z"
+  }
+},
+{
+  "model": "courses.lesson",
+  "pk": 2,
+  "fields": {
+    "course": 1,
+    "title": "Instalasi & Setup Environment",
+    "content_type": "video",
+    "content": "Konten pelajaran: Instalasi & Setup Environment",
+    "video_url": null,
+    "duration_minutes": 20,
+    "order": 1,
+    "is_free_preview": false,
+    "created_at": "2026-06-01T12:21:27.528Z"
+  }
+},
+{
+  "model": "courses.lesson",
+  "pk": 3,
+  "fields": {
+    "course": 1,
+    "title": "Variabel dan Tipe Data",
+    "content_type": "text",
+    "content": "Konten pelajaran: Variabel dan Tipe Data",
+    "video_url": null,
+    "duration_minutes": 10,
+    "order": 2,
+    "is_free_preview": false,
+    "created_at": "2026-06-01T12:21:27.528Z"
+  }
+},
+{
+  "model": "courses.lesson",
+  "pk": 4,
+  "fields": {
+    "course": 1,
+    "title": "Kondisi dan Perulangan",
+    "content_type": "video",
+    "content": "Konten pelajaran: Kondisi dan Perulangan",
+    "video_url": null,
+    "duration_minutes": 25,
+    "order": 3,
+    "is_free_preview": false,
+    "created_at": "2026-06-01T12:21:27.528Z"
+  }
+},
+{
+  "model": "courses.lesson",
+  "pk": 5,
+  "fields": {
+    "course": 1,
+    "title": "Fungsi dan Module",
+    "content_type": "video",
+    "content": "Konten pelajaran: Fungsi dan Module",
+    "video_url": null,
+    "duration_minutes": 30,
+    "order": 4,
+    "is_free_preview": false,
+    "created_at": "2026-06-01T12:21:27.528Z"
+  }
+},
+{
+  "model": "courses.lesson",
+  "pk": 6,
+  "fields": {
+    "course": 1,
+    "title": "OOP Dasar",
+    "content_type": "video",
+    "content": "Konten pelajaran: OOP Dasar",
+    "video_url": null,
+    "duration_minutes": 35,
+    "order": 5,
+    "is_free_preview": false,
+    "created_at": "2026-06-01T12:21:27.528Z"
+  }
+},
+{
+  "model": "courses.lesson",
+  "pk": 7,
+  "fields": {
+    "course": 1,
+    "title": "File I/O",
+    "content_type": "text",
+    "content": "Konten pelajaran: File I/O",
+    "video_url": null,
+    "duration_minutes": 15,
+    "order": 6,
+    "is_free_preview": false,
+    "created_at": "2026-06-01T12:21:27.528Z"
+  }
+},
+{
+  "model": "courses.lesson",
+  "pk": 8,
+  "fields": {
+    "course": 1,
+    "title": "Project Akhir",
+    "content_type": "assignment",
+    "content": "Konten pelajaran: Project Akhir",
+    "video_url": null,
+    "duration_minutes": 60,
+    "order": 7,
+    "is_free_preview": false,
+    "created_at": "2026-06-01T12:21:27.528Z"
+  }
+},
+{
+  "model": "courses.lesson",
+  "pk": 9,
+  "fields": {
+    "course": 2,
+    "title": "Pengenalan Django",
+    "content_type": "video",
+    "content": "Konten pelajaran: Pengenalan Django",
+    "video_url": null,
+    "duration_minutes": 20,
+    "order": 0,
+    "is_free_preview": true,
+    "created_at": "2026-06-01T12:21:27.528Z"
+  }
+},
+{
+  "model": "courses.lesson",
+  "pk": 10,
+  "fields": {
+    "course": 2,
+    "title": "Setup Project Django",
+    "content_type": "video",
+    "content": "Konten pelajaran: Setup Project Django",
+    "video_url": null,
+    "duration_minutes": 25,
+    "order": 1,
+    "is_free_preview": false,
+    "created_at": "2026-06-01T12:21:27.528Z"
+  }
+},
+{
+  "model": "courses.lesson",
+  "pk": 11,
+  "fields": {
+    "course": 2,
+    "title": "Models dan ORM",
+    "content_type": "video",
+    "content": "Konten pelajaran: Models dan ORM",
+    "video_url": null,
+    "duration_minutes": 40,
+    "order": 2,
+    "is_free_preview": false,
+    "created_at": "2026-06-01T12:21:27.528Z"
+  }
+},
+{
+  "model": "courses.lesson",
+  "pk": 12,
+  "fields": {
+    "course": 2,
+    "title": "Views dan URL Routing",
+    "content_type": "video",
+    "content": "Konten pelajaran: Views dan URL Routing",
+    "video_url": null,
+    "duration_minutes": 35,
+    "order": 3,
+    "is_free_preview": false,
+    "created_at": "2026-06-01T12:21:27.528Z"
+  }
+},
+{
+  "model": "courses.lesson",
+  "pk": 13,
+  "fields": {
+    "course": 2,
+    "title": "Templates",
+    "content_type": "video",
+    "content": "Konten pelajaran: Templates",
+    "video_url": null,
+    "duration_minutes": 30,
+    "order": 4,
+    "is_free_preview": false,
+    "created_at": "2026-06-01T12:21:27.528Z"
+  }
+},
+{
+  "model": "courses.lesson",
+  "pk": 14,
+  "fields": {
+    "course": 2,
+    "title": "Forms dan Validasi",
+    "content_type": "video",
+    "content": "Konten pelajaran: Forms dan Validasi",
+    "video_url": null,
+    "duration_minutes": 40,
+    "order": 5,
+    "is_free_preview": false,
+    "created_at": "2026-06-01T12:21:27.528Z"
+  }
+},
+{
+  "model": "courses.lesson",
+  "pk": 15,
+  "fields": {
+    "course": 2,
+    "title": "Authentication",
+    "content_type": "video",
+    "content": "Konten pelajaran: Authentication",
+    "video_url": null,
+    "duration_minutes": 35,
+    "order": 6,
+    "is_free_preview": false,
+    "created_at": "2026-06-01T12:21:27.528Z"
+  }
+},
+{
+  "model": "courses.lesson",
+  "pk": 16,
+  "fields": {
+    "course": 2,
+    "title": "REST API dengan DRF",
+    "content_type": "video",
+    "content": "Konten pelajaran: REST API dengan DRF",
+    "video_url": null,
+    "duration_minutes": 50,
+    "order": 7,
+    "is_free_preview": false,
+    "created_at": "2026-06-01T12:21:27.528Z"
+  }
+},
+{
+  "model": "courses.lesson",
+  "pk": 17,
+  "fields": {
+    "course": 3,
+    "title": "Pengenalan Container",
+    "content_type": "video",
+    "content": "Konten pelajaran: Pengenalan Container",
+    "video_url": null,
+    "duration_minutes": 15,
+    "order": 0,
+    "is_free_preview": true,
+    "created_at": "2026-06-01T12:21:27.528Z"
+  }
+},
+{
+  "model": "courses.lesson",
+  "pk": 18,
+  "fields": {
+    "course": 3,
+    "title": "Instalasi Docker",
+    "content_type": "video",
+    "content": "Konten pelajaran: Instalasi Docker",
+    "video_url": null,
+    "duration_minutes": 20,
+    "order": 1,
+    "is_free_preview": false,
+    "created_at": "2026-06-01T12:21:27.528Z"
+  }
+},
+{
+  "model": "courses.lesson",
+  "pk": 19,
+  "fields": {
+    "course": 3,
+    "title": "Docker Images dan Containers",
+    "content_type": "video",
+    "content": "Konten pelajaran: Docker Images dan Containers",
+    "video_url": null,
+    "duration_minutes": 30,
+    "order": 2,
+    "is_free_preview": false,
+    "created_at": "2026-06-01T12:21:27.528Z"
+  }
+},
+{
+  "model": "courses.lesson",
+  "pk": 20,
+  "fields": {
+    "course": 3,
+    "title": "Dockerfile",
+    "content_type": "text",
+    "content": "Konten pelajaran: Dockerfile",
+    "video_url": null,
+    "duration_minutes": 25,
+    "order": 3,
+    "is_free_preview": false,
+    "created_at": "2026-06-01T12:21:27.528Z"
+  }
+},
+{
+  "model": "courses.lesson",
+  "pk": 21,
+  "fields": {
+    "course": 3,
+    "title": "Docker Compose",
+    "content_type": "video",
+    "content": "Konten pelajaran: Docker Compose",
+    "video_url": null,
+    "duration_minutes": 40,
+    "order": 4,
+    "is_free_preview": false,
+    "created_at": "2026-06-01T12:21:27.528Z"
+  }
+},
+{
+  "model": "courses.lesson",
+  "pk": 22,
+  "fields": {
+    "course": 3,
+    "title": "Networking di Docker",
+    "content_type": "video",
+    "content": "Konten pelajaran: Networking di Docker",
+    "video_url": null,
+    "duration_minutes": 35,
+    "order": 5,
+    "is_free_preview": false,
+    "created_at": "2026-06-01T12:21:27.528Z"
+  }
+},
+{
+  "model": "courses.lesson",
+  "pk": 23,
+  "fields": {
+    "course": 3,
+    "title": "Volumes dan Persistence",
+    "content_type": "video",
+    "content": "Konten pelajaran: Volumes dan Persistence",
+    "video_url": null,
+    "duration_minutes": 30,
+    "order": 6,
+    "is_free_preview": false,
+    "created_at": "2026-06-01T12:21:27.528Z"
+  }
+},
+{
+  "model": "courses.lesson",
+  "pk": 24,
+  "fields": {
+    "course": 3,
+    "title": "Deploy ke Production",
+    "content_type": "assignment",
+    "content": "Konten pelajaran: Deploy ke Production",
+    "video_url": null,
+    "duration_minutes": 60,
+    "order": 7,
+    "is_free_preview": false,
+    "created_at": "2026-06-01T12:21:27.528Z"
+  }
+},
+{
+  "model": "courses.enrollment",
+  "pk": 1,
+  "fields": {
+    "student": [
+      "student_01"
+    ],
+    "course": 1,
+    "status": "active",
+    "enrolled_at": "2026-06-01T12:21:27.545Z",
+    "completed_at": null
+  }
+},
+{
+  "model": "courses.enrollment",
+  "pk": 2,
+  "fields": {
+    "student": [
+      "student_01"
+    ],
+    "course": 3,
+    "status": "active",
+    "enrolled_at": "2026-06-01T12:21:27.545Z",
+    "completed_at": null
+  }
+},
+{
+  "model": "courses.enrollment",
+  "pk": 3,
+  "fields": {
+    "student": [
+      "student_01"
+    ],
+    "course": 4,
+    "status": "active",
+    "enrolled_at": "2026-06-01T12:21:27.545Z",
+    "completed_at": null
+  }
+},
+{
+  "model": "courses.enrollment",
+  "pk": 4,
+  "fields": {
+    "student": [
+      "student_02"
+    ],
+    "course": 3,
+    "status": "active",
+    "enrolled_at": "2026-06-01T12:21:27.545Z",
+    "completed_at": null
+  }
+},
+{
+  "model": "courses.enrollment",
+  "pk": 5,
+  "fields": {
+    "student": [
+      "student_02"
+    ],
+    "course": 4,
+    "status": "active",
+    "enrolled_at": "2026-06-01T12:21:27.545Z",
+    "completed_at": null
+  }
+},
+{
+  "model": "courses.enrollment",
+  "pk": 6,
+  "fields": {
+    "student": [
+      "student_02"
+    ],
+    "course": 2,
+    "status": "active",
+    "enrolled_at": "2026-06-01T12:21:27.545Z",
+    "completed_at": null
+  }
+},
+{
+  "model": "courses.enrollment",
+  "pk": 7,
+  "fields": {
+    "student": [
+      "student_03"
+    ],
+    "course": 4,
+    "status": "active",
+    "enrolled_at": "2026-06-01T12:21:27.545Z",
+    "completed_at": null
+  }
+},
+{
+  "model": "courses.enrollment",
+  "pk": 8,
+  "fields": {
+    "student": [
+      "student_03"
+    ],
+    "course": 1,
+    "status": "active",
+    "enrolled_at": "2026-06-01T12:21:27.545Z",
+    "completed_at": null
+  }
+},
+{
+  "model": "courses.enrollment",
+  "pk": 9,
+  "fields": {
+    "student": [
+      "student_03"
+    ],
+    "course": 3,
+    "status": "active",
+    "enrolled_at": "2026-06-01T12:21:27.545Z",
+    "completed_at": null
+  }
+},
+{
+  "model": "courses.enrollment",
+  "pk": 10,
+  "fields": {
+    "student": [
+      "student_04"
+    ],
+    "course": 1,
+    "status": "active",
+    "enrolled_at": "2026-06-01T12:21:27.545Z",
+    "completed_at": null
+  }
+},
+{
+  "model": "courses.enrollment",
+  "pk": 11,
+  "fields": {
+    "student": [
+      "student_04"
+    ],
+    "course": 2,
+    "status": "active",
+    "enrolled_at": "2026-06-01T12:21:27.545Z",
+    "completed_at": null
+  }
+},
+{
+  "model": "courses.enrollment",
+  "pk": 12,
+  "fields": {
+    "student": [
+      "student_04"
+    ],
+    "course": 3,
+    "status": "active",
+    "enrolled_at": "2026-06-01T12:21:27.545Z",
+    "completed_at": null
+  }
+},
+{
+  "model": "courses.enrollment",
+  "pk": 13,
+  "fields": {
+    "student": [
+      "student_05"
+    ],
+    "course": 3,
+    "status": "active",
+    "enrolled_at": "2026-06-01T12:21:27.545Z",
+    "completed_at": null
+  }
+},
+{
+  "model": "courses.enrollment",
+  "pk": 14,
+  "fields": {
+    "student": [
+      "student_05"
+    ],
+    "course": 1,
+    "status": "active",
+    "enrolled_at": "2026-06-01T12:21:27.545Z",
+    "completed_at": null
+  }
+},
+{
+  "model": "courses.enrollment",
+  "pk": 15,
+  "fields": {
+    "student": [
+      "student_05"
+    ],
+    "course": 2,
+    "status": "active",
+    "enrolled_at": "2026-06-01T12:21:27.545Z",
+    "completed_at": null
+  }
+},
+{
+  "model": "courses.enrollment",
+  "pk": 16,
+  "fields": {
+    "student": [
+      "student_06"
+    ],
+    "course": 2,
+    "status": "active",
+    "enrolled_at": "2026-06-01T12:21:27.545Z",
+    "completed_at": null
+  }
+},
+{
+  "model": "courses.enrollment",
+  "pk": 17,
+  "fields": {
+    "student": [
+      "student_06"
+    ],
+    "course": 3,
+    "status": "active",
+    "enrolled_at": "2026-06-01T12:21:27.545Z",
+    "completed_at": null
+  }
+},
+{
+  "model": "courses.enrollment",
+  "pk": 18,
+  "fields": {
+    "student": [
+      "student_06"
+    ],
+    "course": 4,
+    "status": "active",
+    "enrolled_at": "2026-06-01T12:21:27.545Z",
+    "completed_at": null
+  }
+},
+{
+  "model": "courses.enrollment",
+  "pk": 19,
+  "fields": {
+    "student": [
+      "student_07"
+    ],
+    "course": 2,
+    "status": "active",
+    "enrolled_at": "2026-06-01T12:21:27.545Z",
+    "completed_at": null
+  }
+},
+{
+  "model": "courses.enrollment",
+  "pk": 20,
+  "fields": {
+    "student": [
+      "student_07"
+    ],
+    "course": 3,
+    "status": "active",
+    "enrolled_at": "2026-06-01T12:21:27.545Z",
+    "completed_at": null
+  }
+},
+{
+  "model": "courses.enrollment",
+  "pk": 21,
+  "fields": {
+    "student": [
+      "student_08"
+    ],
+    "course": 2,
+    "status": "active",
+    "enrolled_at": "2026-06-01T12:21:27.545Z",
+    "completed_at": null
+  }
+},
+{
+  "model": "courses.enrollment",
+  "pk": 22,
+  "fields": {
+    "student": [
+      "student_08"
+    ],
+    "course": 1,
+    "status": "active",
+    "enrolled_at": "2026-06-01T12:21:27.545Z",
+    "completed_at": null
+  }
+},
+{
+  "model": "courses.enrollment",
+  "pk": 23,
+  "fields": {
+    "student": [
+      "student_08"
+    ],
+    "course": 4,
+    "status": "active",
+    "enrolled_at": "2026-06-01T12:21:27.545Z",
+    "completed_at": null
+  }
+},
+{
+  "model": "courses.enrollment",
+  "pk": 24,
+  "fields": {
+    "student": [
+      "student_09"
+    ],
+    "course": 1,
+    "status": "active",
+    "enrolled_at": "2026-06-01T12:21:27.545Z",
+    "completed_at": null
+  }
+},
+{
+  "model": "courses.enrollment",
+  "pk": 25,
+  "fields": {
+    "student": [
+      "student_09"
+    ],
+    "course": 4,
+    "status": "active",
+    "enrolled_at": "2026-06-01T12:21:27.545Z",
+    "completed_at": null
+  }
+},
+{
+  "model": "courses.enrollment",
+  "pk": 26,
+  "fields": {
+    "student": [
+      "student_10"
+    ],
+    "course": 1,
+    "status": "active",
+    "enrolled_at": "2026-06-01T12:21:27.545Z",
+    "completed_at": null
+  }
+},
+{
+  "model": "courses.enrollment",
+  "pk": 27,
+  "fields": {
+    "student": [
+      "student_10"
+    ],
+    "course": 2,
+    "status": "active",
+    "enrolled_at": "2026-06-01T12:21:27.545Z",
+    "completed_at": null
+  }
+},
+{
+  "model": "courses.enrollment",
+  "pk": 28,
+  "fields": {
+    "student": [
+      "student_10"
+    ],
+    "course": 4,
+    "status": "active",
+    "enrolled_at": "2026-06-01T12:21:27.545Z",
+    "completed_at": null
+  }
+},
+{
+  "model": "courses.progress",
+  "pk": 1,
+  "fields": {
+    "enrollment": 27,
+    "lesson": 9,
+    "is_completed": false,
+    "completed_at": null,
+    "last_position_seconds": 1009
+  }
+},
+{
+  "model": "courses.progress",
+  "pk": 2,
+  "fields": {
+    "enrollment": 27,
+    "lesson": 10,
+    "is_completed": false,
+    "completed_at": null,
+    "last_position_seconds": 1219
+  }
+},
+{
+  "model": "courses.progress",
+  "pk": 3,
+  "fields": {
+    "enrollment": 27,
+    "lesson": 11,
+    "is_completed": true,
+    "completed_at": null,
+    "last_position_seconds": 167
+  }
+},
+{
+  "model": "courses.progress",
+  "pk": 4,
+  "fields": {
+    "enrollment": 27,
+    "lesson": 12,
+    "is_completed": true,
+    "completed_at": null,
+    "last_position_seconds": 923
+  }
+},
+{
+  "model": "courses.progress",
+  "pk": 5,
+  "fields": {
+    "enrollment": 27,
+    "lesson": 13,
+    "is_completed": true,
+    "completed_at": null,
+    "last_position_seconds": 882
+  }
+},
+{
+  "model": "courses.progress",
+  "pk": 6,
+  "fields": {
+    "enrollment": 27,
+    "lesson": 14,
+    "is_completed": true,
+    "completed_at": null,
+    "last_position_seconds": 2077
+  }
+},
+{
+  "model": "courses.progress",
+  "pk": 7,
+  "fields": {
+    "enrollment": 27,
+    "lesson": 15,
+    "is_completed": false,
+    "completed_at": null,
+    "last_position_seconds": 299
+  }
+},
+{
+  "model": "courses.progress",
+  "pk": 8,
+  "fields": {
+    "enrollment": 27,
+    "lesson": 16,
+    "is_completed": true,
+    "completed_at": null,
+    "last_position_seconds": 2484
+  }
+},
+{
+  "model": "courses.progress",
+  "pk": 9,
+  "fields": {
+    "enrollment": 26,
+    "lesson": 1,
+    "is_completed": true,
+    "completed_at": null,
+    "last_position_seconds": 276
+  }
+},
+{
+  "model": "courses.progress",
+  "pk": 10,
+  "fields": {
+    "enrollment": 26,
+    "lesson": 2,
+    "is_completed": false,
+    "completed_at": null,
+    "last_position_seconds": 775
+  }
+},
+{
+  "model": "courses.progress",
+  "pk": 11,
+  "fields": {
+    "enrollment": 26,
+    "lesson": 3,
+    "is_completed": false,
+    "completed_at": null,
+    "last_position_seconds": 177
+  }
+},
+{
+  "model": "courses.progress",
+  "pk": 12,
+  "fields": {
+    "enrollment": 26,
+    "lesson": 4,
+    "is_completed": false,
+    "completed_at": null,
+    "last_position_seconds": 174
+  }
+},
+{
+  "model": "courses.progress",
+  "pk": 13,
+  "fields": {
+    "enrollment": 26,
+    "lesson": 5,
+    "is_completed": true,
+    "completed_at": null,
+    "last_position_seconds": 1755
+  }
+},
+{
+  "model": "courses.progress",
+  "pk": 14,
+  "fields": {
+    "enrollment": 26,
+    "lesson": 6,
+    "is_completed": false,
+    "completed_at": null,
+    "last_position_seconds": 618
+  }
+},
+{
+  "model": "courses.progress",
+  "pk": 15,
+  "fields": {
+    "enrollment": 26,
+    "lesson": 7,
+    "is_completed": false,
+    "completed_at": null,
+    "last_position_seconds": 48
+  }
+},
+{
+  "model": "courses.progress",
+  "pk": 16,
+  "fields": {
+    "enrollment": 26,
+    "lesson": 8,
+    "is_completed": false,
+    "completed_at": null,
+    "last_position_seconds": 2958
+  }
+},
+{
+  "model": "courses.progress",
+  "pk": 17,
+  "fields": {
+    "enrollment": 24,
+    "lesson": 1,
+    "is_completed": false,
+    "completed_at": null,
+    "last_position_seconds": 350
+  }
+},
+{
+  "model": "courses.progress",
+  "pk": 18,
+  "fields": {
+    "enrollment": 24,
+    "lesson": 2,
+    "is_completed": false,
+    "completed_at": null,
+    "last_position_seconds": 711
+  }
+},
+{
+  "model": "courses.progress",
+  "pk": 19,
+  "fields": {
+    "enrollment": 24,
+    "lesson": 3,
+    "is_completed": false,
+    "completed_at": null,
+    "last_position_seconds": 469
+  }
+},
+{
+  "model": "courses.progress",
+  "pk": 20,
+  "fields": {
+    "enrollment": 24,
+    "lesson": 4,
+    "is_completed": false,
+    "completed_at": null,
+    "last_position_seconds": 1167
+  }
+},
+{
+  "model": "courses.progress",
+  "pk": 21,
+  "fields": {
+    "enrollment": 24,
+    "lesson": 5,
+    "is_completed": false,
+    "completed_at": null,
+    "last_position_seconds": 1780
+  }
+},
+{
+  "model": "courses.progress",
+  "pk": 22,
+  "fields": {
+    "enrollment": 24,
+    "lesson": 6,
+    "is_completed": false,
+    "completed_at": null,
+    "last_position_seconds": 1989
+  }
+},
+{
+  "model": "courses.progress",
+  "pk": 23,
+  "fields": {
+    "enrollment": 24,
+    "lesson": 7,
+    "is_completed": true,
+    "completed_at": null,
+    "last_position_seconds": 486
+  }
+},
+{
+  "model": "courses.progress",
+  "pk": 24,
+  "fields": {
+    "enrollment": 24,
+    "lesson": 8,
+    "is_completed": true,
+    "completed_at": null,
+    "last_position_seconds": 3327
+  }
+},
+{
+  "model": "courses.progress",
+  "pk": 25,
+  "fields": {
+    "enrollment": 22,
+    "lesson": 1,
+    "is_completed": true,
+    "completed_at": null,
+    "last_position_seconds": 459
+  }
+},
+{
+  "model": "courses.progress",
+  "pk": 26,
+  "fields": {
+    "enrollment": 22,
+    "lesson": 2,
+    "is_completed": true,
+    "completed_at": null,
+    "last_position_seconds": 100
+  }
+},
+{
+  "model": "courses.progress",
+  "pk": 27,
+  "fields": {
+    "enrollment": 22,
+    "lesson": 3,
+    "is_completed": true,
+    "completed_at": null,
+    "last_position_seconds": 267
+  }
+},
+{
+  "model": "courses.progress",
+  "pk": 28,
+  "fields": {
+    "enrollment": 22,
+    "lesson": 4,
+    "is_completed": false,
+    "completed_at": null,
+    "last_position_seconds": 1282
+  }
+},
+{
+  "model": "courses.progress",
+  "pk": 29,
+  "fields": {
+    "enrollment": 22,
+    "lesson": 5,
+    "is_completed": true,
+    "completed_at": null,
+    "last_position_seconds": 275
+  }
+},
+{
+  "model": "courses.progress",
+  "pk": 30,
+  "fields": {
+    "enrollment": 22,
+    "lesson": 6,
+    "is_completed": false,
+    "completed_at": null,
+    "last_position_seconds": 1675
+  }
+},
+{
+  "model": "courses.progress",
+  "pk": 31,
+  "fields": {
+    "enrollment": 22,
+    "lesson": 7,
+    "is_completed": true,
+    "completed_at": null,
+    "last_position_seconds": 521
+  }
+},
+{
+  "model": "courses.progress",
+  "pk": 32,
+  "fields": {
+    "enrollment": 22,
+    "lesson": 8,
+    "is_completed": false,
+    "completed_at": null,
+    "last_position_seconds": 540
+  }
+},
+{
+  "model": "courses.progress",
+  "pk": 33,
+  "fields": {
+    "enrollment": 21,
+    "lesson": 9,
+    "is_completed": true,
+    "completed_at": null,
+    "last_position_seconds": 589
+  }
+},
+{
+  "model": "courses.progress",
+  "pk": 34,
+  "fields": {
+    "enrollment": 21,
+    "lesson": 10,
+    "is_completed": true,
+    "completed_at": null,
+    "last_position_seconds": 54
+  }
+},
+{
+  "model": "courses.progress",
+  "pk": 35,
+  "fields": {
+    "enrollment": 21,
+    "lesson": 11,
+    "is_completed": true,
+    "completed_at": null,
+    "last_position_seconds": 1697
+  }
+},
+{
+  "model": "courses.progress",
+  "pk": 36,
+  "fields": {
+    "enrollment": 21,
+    "lesson": 12,
+    "is_completed": false,
+    "completed_at": null,
+    "last_position_seconds": 234
+  }
+},
+{
+  "model": "courses.progress",
+  "pk": 37,
+  "fields": {
+    "enrollment": 21,
+    "lesson": 13,
+    "is_completed": false,
+    "completed_at": null,
+    "last_position_seconds": 1452
+  }
+},
+{
+  "model": "courses.progress",
+  "pk": 38,
+  "fields": {
+    "enrollment": 21,
+    "lesson": 14,
+    "is_completed": false,
+    "completed_at": null,
+    "last_position_seconds": 1955
+  }
+},
+{
+  "model": "courses.progress",
+  "pk": 39,
+  "fields": {
+    "enrollment": 21,
+    "lesson": 15,
+    "is_completed": false,
+    "completed_at": null,
+    "last_position_seconds": 1498
+  }
+},
+{
+  "model": "courses.progress",
+  "pk": 40,
+  "fields": {
+    "enrollment": 21,
+    "lesson": 16,
+    "is_completed": false,
+    "completed_at": null,
+    "last_position_seconds": 376
+  }
+},
+{
+  "model": "courses.progress",
+  "pk": 41,
+  "fields": {
+    "enrollment": 20,
+    "lesson": 17,
+    "is_completed": false,
+    "completed_at": null,
+    "last_position_seconds": 882
+  }
+},
+{
+  "model": "courses.progress",
+  "pk": 42,
+  "fields": {
+    "enrollment": 20,
+    "lesson": 18,
+    "is_completed": true,
+    "completed_at": null,
+    "last_position_seconds": 25
+  }
+},
+{
+  "model": "courses.progress",
+  "pk": 43,
+  "fields": {
+    "enrollment": 20,
+    "lesson": 19,
+    "is_completed": false,
+    "completed_at": null,
+    "last_position_seconds": 721
+  }
+},
+{
+  "model": "courses.progress",
+  "pk": 44,
+  "fields": {
+    "enrollment": 20,
+    "lesson": 20,
+    "is_completed": true,
+    "completed_at": null,
+    "last_position_seconds": 239
+  }
+},
+{
+  "model": "courses.progress",
+  "pk": 45,
+  "fields": {
+    "enrollment": 20,
+    "lesson": 21,
+    "is_completed": true,
+    "completed_at": null,
+    "last_position_seconds": 934
+  }
+},
+{
+  "model": "courses.progress",
+  "pk": 46,
+  "fields": {
+    "enrollment": 20,
+    "lesson": 22,
+    "is_completed": false,
+    "completed_at": null,
+    "last_position_seconds": 474
+  }
+},
+{
+  "model": "courses.progress",
+  "pk": 47,
+  "fields": {
+    "enrollment": 20,
+    "lesson": 23,
+    "is_completed": false,
+    "completed_at": null,
+    "last_position_seconds": 251
+  }
+},
+{
+  "model": "courses.progress",
+  "pk": 48,
+  "fields": {
+    "enrollment": 20,
+    "lesson": 24,
+    "is_completed": false,
+    "completed_at": null,
+    "last_position_seconds": 2310
+  }
+},
+{
+  "model": "courses.progress",
+  "pk": 49,
+  "fields": {
+    "enrollment": 19,
+    "lesson": 9,
+    "is_completed": true,
+    "completed_at": null,
+    "last_position_seconds": 289
+  }
+},
+{
+  "model": "courses.progress",
+  "pk": 50,
+  "fields": {
+    "enrollment": 19,
+    "lesson": 10,
+    "is_completed": true,
+    "completed_at": null,
+    "last_position_seconds": 831
+  }
+},
+{
+  "model": "courses.progress",
+  "pk": 51,
+  "fields": {
+    "enrollment": 19,
+    "lesson": 11,
+    "is_completed": true,
+    "completed_at": null,
+    "last_position_seconds": 749
+  }
+},
+{
+  "model": "courses.progress",
+  "pk": 52,
+  "fields": {
+    "enrollment": 19,
+    "lesson": 12,
+    "is_completed": true,
+    "completed_at": null,
+    "last_position_seconds": 1202
+  }
+},
+{
+  "model": "courses.progress",
+  "pk": 53,
+  "fields": {
+    "enrollment": 19,
+    "lesson": 13,
+    "is_completed": true,
+    "completed_at": null,
+    "last_position_seconds": 619
+  }
+},
+{
+  "model": "courses.progress",
+  "pk": 54,
+  "fields": {
+    "enrollment": 19,
+    "lesson": 14,
+    "is_completed": false,
+    "completed_at": null,
+    "last_position_seconds": 480
+  }
+},
+{
+  "model": "courses.progress",
+  "pk": 55,
+  "fields": {
+    "enrollment": 19,
+    "lesson": 15,
+    "is_completed": true,
+    "completed_at": null,
+    "last_position_seconds": 1714
+  }
+},
+{
+  "model": "courses.progress",
+  "pk": 56,
+  "fields": {
+    "enrollment": 19,
+    "lesson": 16,
+    "is_completed": false,
+    "completed_at": null,
+    "last_position_seconds": 1824
+  }
+},
+{
+  "model": "courses.progress",
+  "pk": 57,
+  "fields": {
+    "enrollment": 17,
+    "lesson": 17,
+    "is_completed": true,
+    "completed_at": null,
+    "last_position_seconds": 714
+  }
+},
+{
+  "model": "courses.progress",
+  "pk": 58,
+  "fields": {
+    "enrollment": 17,
+    "lesson": 18,
+    "is_completed": true,
+    "completed_at": null,
+    "last_position_seconds": 720
+  }
+},
+{
+  "model": "courses.progress",
+  "pk": 59,
+  "fields": {
+    "enrollment": 17,
+    "lesson": 19,
+    "is_completed": true,
+    "completed_at": null,
+    "last_position_seconds": 1144
+  }
+},
+{
+  "model": "courses.progress",
+  "pk": 60,
+  "fields": {
+    "enrollment": 17,
+    "lesson": 20,
+    "is_completed": false,
+    "completed_at": null,
+    "last_position_seconds": 375
+  }
+},
+{
+  "model": "courses.progress",
+  "pk": 61,
+  "fields": {
+    "enrollment": 17,
+    "lesson": 21,
+    "is_completed": true,
+    "completed_at": null,
+    "last_position_seconds": 1244
+  }
+},
+{
+  "model": "courses.progress",
+  "pk": 62,
+  "fields": {
+    "enrollment": 17,
+    "lesson": 22,
+    "is_completed": true,
+    "completed_at": null,
+    "last_position_seconds": 107
+  }
+},
+{
+  "model": "courses.progress",
+  "pk": 63,
+  "fields": {
+    "enrollment": 17,
+    "lesson": 23,
+    "is_completed": true,
+    "completed_at": null,
+    "last_position_seconds": 141
+  }
+},
+{
+  "model": "courses.progress",
+  "pk": 64,
+  "fields": {
+    "enrollment": 17,
+    "lesson": 24,
+    "is_completed": true,
+    "completed_at": null,
+    "last_position_seconds": 1888
+  }
+},
+{
+  "model": "courses.progress",
+  "pk": 65,
+  "fields": {
+    "enrollment": 16,
+    "lesson": 9,
+    "is_completed": false,
+    "completed_at": null,
+    "last_position_seconds": 1109
+  }
+},
+{
+  "model": "courses.progress",
+  "pk": 66,
+  "fields": {
+    "enrollment": 16,
+    "lesson": 10,
+    "is_completed": false,
+    "completed_at": null,
+    "last_position_seconds": 48
+  }
+},
+{
+  "model": "courses.progress",
+  "pk": 67,
+  "fields": {
+    "enrollment": 16,
+    "lesson": 11,
+    "is_completed": true,
+    "completed_at": null,
+    "last_position_seconds": 1246
+  }
+},
+{
+  "model": "courses.progress",
+  "pk": 68,
+  "fields": {
+    "enrollment": 16,
+    "lesson": 12,
+    "is_completed": false,
+    "completed_at": null,
+    "last_position_seconds": 1029
+  }
+},
+{
+  "model": "courses.progress",
+  "pk": 69,
+  "fields": {
+    "enrollment": 16,
+    "lesson": 13,
+    "is_completed": false,
+    "completed_at": null,
+    "last_position_seconds": 1477
+  }
+},
+{
+  "model": "courses.progress",
+  "pk": 70,
+  "fields": {
+    "enrollment": 16,
+    "lesson": 14,
+    "is_completed": false,
+    "completed_at": null,
+    "last_position_seconds": 1333
+  }
+},
+{
+  "model": "courses.progress",
+  "pk": 71,
+  "fields": {
+    "enrollment": 16,
+    "lesson": 15,
+    "is_completed": false,
+    "completed_at": null,
+    "last_position_seconds": 1597
+  }
+},
+{
+  "model": "courses.progress",
+  "pk": 72,
+  "fields": {
+    "enrollment": 16,
+    "lesson": 16,
+    "is_completed": false,
+    "completed_at": null,
+    "last_position_seconds": 2746
+  }
+},
+{
+  "model": "courses.progress",
+  "pk": 73,
+  "fields": {
+    "enrollment": 15,
+    "lesson": 9,
+    "is_completed": true,
+    "completed_at": null,
+    "last_position_seconds": 1173
+  }
+},
+{
+  "model": "courses.progress",
+  "pk": 74,
+  "fields": {
+    "enrollment": 15,
+    "lesson": 10,
+    "is_completed": true,
+    "completed_at": null,
+    "last_position_seconds": 85
+  }
+},
+{
+  "model": "courses.progress",
+  "pk": 75,
+  "fields": {
+    "enrollment": 15,
+    "lesson": 11,
+    "is_completed": true,
+    "completed_at": null,
+    "last_position_seconds": 1176
+  }
+},
+{
+  "model": "courses.progress",
+  "pk": 76,
+  "fields": {
+    "enrollment": 15,
+    "lesson": 12,
+    "is_completed": true,
+    "completed_at": null,
+    "last_position_seconds": 428
+  }
+},
+{
+  "model": "courses.progress",
+  "pk": 77,
+  "fields": {
+    "enrollment": 15,
+    "lesson": 13,
+    "is_completed": true,
+    "completed_at": null,
+    "last_position_seconds": 1014
+  }
+},
+{
+  "model": "courses.progress",
+  "pk": 78,
+  "fields": {
+    "enrollment": 15,
+    "lesson": 14,
+    "is_completed": true,
+    "completed_at": null,
+    "last_position_seconds": 1352
+  }
+},
+{
+  "model": "courses.progress",
+  "pk": 79,
+  "fields": {
+    "enrollment": 15,
+    "lesson": 15,
+    "is_completed": true,
+    "completed_at": null,
+    "last_position_seconds": 1773
+  }
+},
+{
+  "model": "courses.progress",
+  "pk": 80,
+  "fields": {
+    "enrollment": 15,
+    "lesson": 16,
+    "is_completed": true,
+    "completed_at": null,
+    "last_position_seconds": 1798
+  }
+},
+{
+  "model": "courses.progress",
+  "pk": 81,
+  "fields": {
+    "enrollment": 14,
+    "lesson": 1,
+    "is_completed": false,
+    "completed_at": null,
+    "last_position_seconds": 105
+  }
+},
+{
+  "model": "courses.progress",
+  "pk": 82,
+  "fields": {
+    "enrollment": 14,
+    "lesson": 2,
+    "is_completed": false,
+    "completed_at": null,
+    "last_position_seconds": 48
+  }
+},
+{
+  "model": "courses.progress",
+  "pk": 83,
+  "fields": {
+    "enrollment": 14,
+    "lesson": 3,
+    "is_completed": false,
+    "completed_at": null,
+    "last_position_seconds": 401
+  }
+},
+{
+  "model": "courses.progress",
+  "pk": 84,
+  "fields": {
+    "enrollment": 14,
+    "lesson": 4,
+    "is_completed": false,
+    "completed_at": null,
+    "last_position_seconds": 114
+  }
+},
+{
+  "model": "courses.progress",
+  "pk": 85,
+  "fields": {
+    "enrollment": 14,
+    "lesson": 5,
+    "is_completed": false,
+    "completed_at": null,
+    "last_position_seconds": 25
+  }
+},
+{
+  "model": "courses.progress",
+  "pk": 86,
+  "fields": {
+    "enrollment": 14,
+    "lesson": 6,
+    "is_completed": false,
+    "completed_at": null,
+    "last_position_seconds": 338
+  }
+},
+{
+  "model": "courses.progress",
+  "pk": 87,
+  "fields": {
+    "enrollment": 14,
+    "lesson": 7,
+    "is_completed": false,
+    "completed_at": null,
+    "last_position_seconds": 106
+  }
+},
+{
+  "model": "courses.progress",
+  "pk": 88,
+  "fields": {
+    "enrollment": 14,
+    "lesson": 8,
+    "is_completed": false,
+    "completed_at": null,
+    "last_position_seconds": 940
+  }
+},
+{
+  "model": "courses.progress",
+  "pk": 89,
+  "fields": {
+    "enrollment": 13,
+    "lesson": 17,
+    "is_completed": false,
+    "completed_at": null,
+    "last_position_seconds": 603
+  }
+},
+{
+  "model": "courses.progress",
+  "pk": 90,
+  "fields": {
+    "enrollment": 13,
+    "lesson": 18,
+    "is_completed": false,
+    "completed_at": null,
+    "last_position_seconds": 436
+  }
+},
+{
+  "model": "courses.progress",
+  "pk": 91,
+  "fields": {
+    "enrollment": 13,
+    "lesson": 19,
+    "is_completed": true,
+    "completed_at": null,
+    "last_position_seconds": 1686
+  }
+},
+{
+  "model": "courses.progress",
+  "pk": 92,
+  "fields": {
+    "enrollment": 13,
+    "lesson": 20,
+    "is_completed": false,
+    "completed_at": null,
+    "last_position_seconds": 1118
+  }
+},
+{
+  "model": "courses.progress",
+  "pk": 93,
+  "fields": {
+    "enrollment": 13,
+    "lesson": 21,
+    "is_completed": false,
+    "completed_at": null,
+    "last_position_seconds": 2160
+  }
+},
+{
+  "model": "courses.progress",
+  "pk": 94,
+  "fields": {
+    "enrollment": 13,
+    "lesson": 22,
+    "is_completed": false,
+    "completed_at": null,
+    "last_position_seconds": 1265
+  }
+},
+{
+  "model": "courses.progress",
+  "pk": 95,
+  "fields": {
+    "enrollment": 13,
+    "lesson": 23,
+    "is_completed": false,
+    "completed_at": null,
+    "last_position_seconds": 727
+  }
+},
+{
+  "model": "courses.progress",
+  "pk": 96,
+  "fields": {
+    "enrollment": 13,
+    "lesson": 24,
+    "is_completed": false,
+    "completed_at": null,
+    "last_position_seconds": 324
+  }
+},
+{
+  "model": "courses.progress",
+  "pk": 97,
+  "fields": {
+    "enrollment": 12,
+    "lesson": 17,
+    "is_completed": false,
+    "completed_at": null,
+    "last_position_seconds": 529
+  }
+},
+{
+  "model": "courses.progress",
+  "pk": 98,
+  "fields": {
+    "enrollment": 12,
+    "lesson": 18,
+    "is_completed": false,
+    "completed_at": null,
+    "last_position_seconds": 37
+  }
+},
+{
+  "model": "courses.progress",
+  "pk": 99,
+  "fields": {
+    "enrollment": 12,
+    "lesson": 19,
+    "is_completed": false,
+    "completed_at": null,
+    "last_position_seconds": 595
+  }
+},
+{
+  "model": "courses.progress",
+  "pk": 100,
+  "fields": {
+    "enrollment": 12,
+    "lesson": 20,
+    "is_completed": false,
+    "completed_at": null,
+    "last_position_seconds": 48
+  }
+},
+{
+  "model": "courses.progress",
+  "pk": 101,
+  "fields": {
+    "enrollment": 12,
+    "lesson": 21,
+    "is_completed": false,
+    "completed_at": null,
+    "last_position_seconds": 899
+  }
+},
+{
+  "model": "courses.progress",
+  "pk": 102,
+  "fields": {
+    "enrollment": 12,
+    "lesson": 22,
+    "is_completed": false,
+    "completed_at": null,
+    "last_position_seconds": 2096
+  }
+},
+{
+  "model": "courses.progress",
+  "pk": 103,
+  "fields": {
+    "enrollment": 12,
+    "lesson": 23,
+    "is_completed": false,
+    "completed_at": null,
+    "last_position_seconds": 1690
+  }
+},
+{
+  "model": "courses.progress",
+  "pk": 104,
+  "fields": {
+    "enrollment": 12,
+    "lesson": 24,
+    "is_completed": false,
+    "completed_at": null,
+    "last_position_seconds": 120
+  }
+},
+{
+  "model": "courses.progress",
+  "pk": 105,
+  "fields": {
+    "enrollment": 11,
+    "lesson": 9,
+    "is_completed": true,
+    "completed_at": null,
+    "last_position_seconds": 679
+  }
+},
+{
+  "model": "courses.progress",
+  "pk": 106,
+  "fields": {
+    "enrollment": 11,
+    "lesson": 10,
+    "is_completed": true,
+    "completed_at": null,
+    "last_position_seconds": 719
+  }
+},
+{
+  "model": "courses.progress",
+  "pk": 107,
+  "fields": {
+    "enrollment": 11,
+    "lesson": 11,
+    "is_completed": false,
+    "completed_at": null,
+    "last_position_seconds": 1962
+  }
+},
+{
+  "model": "courses.progress",
+  "pk": 108,
+  "fields": {
+    "enrollment": 11,
+    "lesson": 12,
+    "is_completed": false,
+    "completed_at": null,
+    "last_position_seconds": 836
+  }
+},
+{
+  "model": "courses.progress",
+  "pk": 109,
+  "fields": {
+    "enrollment": 11,
+    "lesson": 13,
+    "is_completed": false,
+    "completed_at": null,
+    "last_position_seconds": 244
+  }
+},
+{
+  "model": "courses.progress",
+  "pk": 110,
+  "fields": {
+    "enrollment": 11,
+    "lesson": 14,
+    "is_completed": false,
+    "completed_at": null,
+    "last_position_seconds": 1958
+  }
+},
+{
+  "model": "courses.progress",
+  "pk": 111,
+  "fields": {
+    "enrollment": 11,
+    "lesson": 15,
+    "is_completed": false,
+    "completed_at": null,
+    "last_position_seconds": 1384
+  }
+},
+{
+  "model": "courses.progress",
+  "pk": 112,
+  "fields": {
+    "enrollment": 11,
+    "lesson": 16,
+    "is_completed": false,
+    "completed_at": null,
+    "last_position_seconds": 114
+  }
+},
+{
+  "model": "courses.progress",
+  "pk": 113,
+  "fields": {
+    "enrollment": 10,
+    "lesson": 1,
+    "is_completed": false,
+    "completed_at": null,
+    "last_position_seconds": 467
+  }
+},
+{
+  "model": "courses.progress",
+  "pk": 114,
+  "fields": {
+    "enrollment": 10,
+    "lesson": 2,
+    "is_completed": true,
+    "completed_at": null,
+    "last_position_seconds": 688
+  }
+},
+{
+  "model": "courses.progress",
+  "pk": 115,
+  "fields": {
+    "enrollment": 10,
+    "lesson": 3,
+    "is_completed": false,
+    "completed_at": null,
+    "last_position_seconds": 469
+  }
+},
+{
+  "model": "courses.progress",
+  "pk": 116,
+  "fields": {
+    "enrollment": 10,
+    "lesson": 4,
+    "is_completed": true,
+    "completed_at": null,
+    "last_position_seconds": 1369
+  }
+},
+{
+  "model": "courses.progress",
+  "pk": 117,
+  "fields": {
+    "enrollment": 10,
+    "lesson": 5,
+    "is_completed": true,
+    "completed_at": null,
+    "last_position_seconds": 1072
+  }
+},
+{
+  "model": "courses.progress",
+  "pk": 118,
+  "fields": {
+    "enrollment": 10,
+    "lesson": 6,
+    "is_completed": false,
+    "completed_at": null,
+    "last_position_seconds": 1493
+  }
+},
+{
+  "model": "courses.progress",
+  "pk": 119,
+  "fields": {
+    "enrollment": 10,
+    "lesson": 7,
+    "is_completed": true,
+    "completed_at": null,
+    "last_position_seconds": 864
+  }
+},
+{
+  "model": "courses.progress",
+  "pk": 120,
+  "fields": {
+    "enrollment": 10,
+    "lesson": 8,
+    "is_completed": true,
+    "completed_at": null,
+    "last_position_seconds": 10
+  }
+},
+{
+  "model": "courses.progress",
+  "pk": 121,
+  "fields": {
+    "enrollment": 9,
+    "lesson": 17,
+    "is_completed": true,
+    "completed_at": null,
+    "last_position_seconds": 709
+  }
+},
+{
+  "model": "courses.progress",
+  "pk": 122,
+  "fields": {
+    "enrollment": 9,
+    "lesson": 18,
+    "is_completed": true,
+    "completed_at": null,
+    "last_position_seconds": 136
+  }
+},
+{
+  "model": "courses.progress",
+  "pk": 123,
+  "fields": {
+    "enrollment": 9,
+    "lesson": 19,
+    "is_completed": true,
+    "completed_at": null,
+    "last_position_seconds": 1155
+  }
+},
+{
+  "model": "courses.progress",
+  "pk": 124,
+  "fields": {
+    "enrollment": 9,
+    "lesson": 20,
+    "is_completed": false,
+    "completed_at": null,
+    "last_position_seconds": 1303
+  }
+},
+{
+  "model": "courses.progress",
+  "pk": 125,
+  "fields": {
+    "enrollment": 9,
+    "lesson": 21,
+    "is_completed": true,
+    "completed_at": null,
+    "last_position_seconds": 892
+  }
+},
+{
+  "model": "courses.progress",
+  "pk": 126,
+  "fields": {
+    "enrollment": 9,
+    "lesson": 22,
+    "is_completed": false,
+    "completed_at": null,
+    "last_position_seconds": 1451
+  }
+},
+{
+  "model": "courses.progress",
+  "pk": 127,
+  "fields": {
+    "enrollment": 9,
+    "lesson": 23,
+    "is_completed": true,
+    "completed_at": null,
+    "last_position_seconds": 195
+  }
+},
+{
+  "model": "courses.progress",
+  "pk": 128,
+  "fields": {
+    "enrollment": 9,
+    "lesson": 24,
+    "is_completed": true,
+    "completed_at": null,
+    "last_position_seconds": 418
+  }
+}
+]

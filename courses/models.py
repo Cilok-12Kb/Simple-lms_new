@@ -174,6 +174,17 @@ class Course(models.Model):
             models.Index(fields=['category'], name='idx_course_category'),
             models.Index(fields=['is_published', '-created_at'],
                          name='idx_course_published_date'),
+            # ← TAMBAHKAN INDEX BARU INI untuk Lab 5:
+            # Index untuk filter berdasarkan harga (sering dipakai di dashboard)
+            models.Index(fields=['price'], name='idx_course_price'),
+
+            # Composite index: instructor + is_published
+            # Untuk query: "tampilkan course published milik instructor X"
+            models.Index(fields=['instructor', 'is_published'],
+                         name='idx_course_inst_pub'),
+
+            # Index untuk level (sering difilter di listing)
+            models.Index(fields=['level'], name='idx_course_level'),
         ]
 
     def __str__(self):
@@ -305,6 +316,11 @@ class Enrollment(models.Model):
         indexes = [
             models.Index(fields=['student', 'status'], name='idx_enrollment_student_status'),
             models.Index(fields=['course', 'status'], name='idx_enrollment_course_status'),
+            # ← TAMBAHKAN:
+            # Index untuk filter enrollment by course + status
+            # Dipakai di dashboard_optimized untuk COUNT active enrollments
+            models.Index(fields=['course', 'status', 'enrolled_at'],
+                         name='idx_enroll_course_stat_date'),
         ]
 
     def __str__(self):

@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'courses',   # ← TAMBAHKAN INI
+    'silk',    # ← TAMBAHKAN INI (harus setelah app lain)
 ]
 
 MIDDLEWARE = [
@@ -49,6 +50,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'silk.middleware.SilkyMiddleware',    # ← TAMBAHKAN INI (paling bawah)
 ]
 
 ROOT_URLCONF = 'config.urls'

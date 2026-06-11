@@ -1,0 +1,243 @@
+{
+  "info": {
+    "name": "Simple LMS API",
+    "description": "Postman Collection untuk Simple LMS REST API\nMata Kuliah Pemrograman Sisi Server - Universitas Dian Nuswantoro",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {"key": "base_url", "value": "http://localhost:8000"},
+    {"key": "access_token", "value": ""},
+    {"key": "refresh_token", "value": ""}
+  ],
+  "item": [
+    {
+      "name": "Authentication",
+      "item": [
+        {
+          "name": "1. Register (Student)",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/api/auth/register",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"test_student\",\n  \"email\": \"student@test.com\",\n  \"password\": \"password123\",\n  \"password_confirm\": \"password123\",\n  \"role\": \"student\"\n}"
+            }
+          }
+        },
+        {
+          "name": "2. Register (Instructor)",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/api/auth/register",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"test_instructor\",\n  \"email\": \"instructor@test.com\",\n  \"password\": \"password123\",\n  \"password_confirm\": \"password123\",\n  \"role\": \"instructor\"\n}"
+            }
+          }
+        },
+        {
+          "name": "3. Login",
+          "event": [{
+            "listen": "test",
+            "script": {
+              "exec": [
+                "const res = pm.response.json();",
+                "if (res.access_token) {",
+                "  pm.collectionVariables.set('access_token', res.access_token);",
+                "  pm.collectionVariables.set('refresh_token', res.refresh_token);",
+                "  console.log('Token saved!');",
+                "}"
+              ]
+            }
+          }],
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/api/auth/login",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"test_student\",\n  \"password\": \"password123\"\n}"
+            }
+          }
+        },
+        {
+          "name": "4. Refresh Token",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/api/auth/refresh",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"refresh_token\": \"{{refresh_token}}\"\n}"
+            }
+          }
+        },
+        {
+          "name": "5. Get My Profile",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/api/auth/me",
+            "header": [{"key": "Authorization", "value": "Bearer {{access_token}}"}]
+          }
+        },
+        {
+          "name": "6. Update Profile",
+          "request": {
+            "method": "PUT",
+            "url": "{{base_url}}/api/auth/me",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"},
+              {"key": "Authorization", "value": "Bearer {{access_token}}"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"first_name\": \"Nama Baru\",\n  \"bio\": \"Saya adalah mahasiswa Dian Nuswantoro\"\n}"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Courses (Public)",
+      "item": [
+        {
+          "name": "7. List Courses",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/api/courses?page=1&page_size=10",
+              "host": ["{{base_url}}"],
+              "path": ["api", "courses"],
+              "query": [
+                {"key": "page", "value": "1"},
+                {"key": "page_size", "value": "10"}
+              ]
+            }
+          }
+        },
+        {
+          "name": "8. List Courses (Filter by Level)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/api/courses?level=beginner&page=1",
+              "host": ["{{base_url}}"],
+              "path": ["api", "courses"],
+              "query": [
+                {"key": "level", "value": "beginner"},
+                {"key": "page", "value": "1"}
+              ]
+            }
+          }
+        },
+        {
+          "name": "9. List Courses (Search)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/api/courses?search=django",
+              "host": ["{{base_url}}"],
+              "path": ["api", "courses"],
+              "query": [{"key": "search", "value": "django"}]
+            }
+          }
+        },
+        {
+          "name": "10. Get Course Detail",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/api/courses/1"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Courses (Protected)",
+      "item": [
+        {
+          "name": "11. Create Course (Instructor)",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/api/courses",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"},
+              {"key": "Authorization", "value": "Bearer {{access_token}}"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Course Baru dari API\",\n  \"description\": \"Deskripsi course baru\",\n  \"level\": \"beginner\",\n  \"price\": 150000\n}"
+            }
+          }
+        },
+        {
+          "name": "12. Update Course (Owner)",
+          "request": {
+            "method": "PATCH",
+            "url": "{{base_url}}/api/courses/1",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"},
+              {"key": "Authorization", "value": "Bearer {{access_token}}"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"is_published\": true,\n  \"price\": 200000\n}"
+            }
+          }
+        },
+        {
+          "name": "13. Delete Course (Admin Only)",
+          "request": {
+            "method": "DELETE",
+            "url": "{{base_url}}/api/courses/99",
+            "header": [{"key": "Authorization", "value": "Bearer {{access_token}}"}]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Enrollments",
+      "item": [
+        {
+          "name": "14. Enroll to Course (Student)",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/api/enrollments",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"},
+              {"key": "Authorization", "value": "Bearer {{access_token}}"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"course_id\": 1\n}"
+            }
+          }
+        },
+        {
+          "name": "15. My Enrolled Courses",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/api/enrollments/my-courses",
+            "header": [{"key": "Authorization", "value": "Bearer {{access_token}}"}]
+          }
+        },
+        {
+          "name": "16. Mark Lesson Complete",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/api/enrollments/1/progress",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"},
+              {"key": "Authorization", "value": "Bearer {{access_token}}"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"lesson_id\": 1,\n  \"is_completed\": true,\n  \"last_position_seconds\": 900\n}"
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

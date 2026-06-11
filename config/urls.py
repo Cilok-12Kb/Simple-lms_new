@@ -16,9 +16,11 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
+from api.main import api   # ← TAMBAHKAN IMPORT INI
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('silk/', include('silk.urls', namespace='silk')),    # ← TAMBAHKAN INI
     path('',       include('courses.urls')),    # ← TAMBAHKAN INI
+    path('api/',   api.urls),    # ← TAMBAHKAN INI — semua /api/* di-handle Ninja
 ]

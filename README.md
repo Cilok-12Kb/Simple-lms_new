@@ -9,7 +9,7 @@
 
 ## Deskripsi
 
-Setup environment development Django untuk Simple Learning Management System menggunakan Docker dan PostgreSQL, dilengkapi dengan data model LMS, query optimization menggunakan Django Silk profiling, dan Django Admin interface.
+Setup environment development Django untuk Simple Learning Management System menggunakan Docker dan PostgreSQL, dilengkapi dengan data model LMS, query optimization menggunakan Django Silk profiling, REST API dengan Django Ninja, dan JWT Authentication & Authorization.
 
 ## Tech Stack
 
@@ -22,6 +22,10 @@ Setup environment development Django untuk Simple Learning Management System men
 | Docker Compose | v2 | Multi-container orchestration |
 | Pillow | 10.2.0 | Image field support |
 | django-silk | 5.0.3 | Query profiling & benchmarking |
+| django-ninja | 1.1.0 | REST API framework (Pydantic-based) |
+| PyJWT | 2.8.0 | JWT token generation & validation |
+| passlib[bcrypt] | 1.7.4 | Password hashing |
+| email-validator | 2.1.1 | Validasi format email di Pydantic |
 
 ## Struktur Project
 
@@ -32,17 +36,27 @@ simple-lms/
 ├── .env.example              # Template environment variables
 ├── requirements.txt          # Python dependencies
 ├── manage.py                 # Django CLI tool
+├── postman_collection.json   # Postman collection untuk testing API
 ├── config/
-│   ├── settings.py           # Konfigurasi Django + Silk middleware
-│   ├── urls.py               # URL routing (termasuk /silk/)
+│   ├── settings.py           # Konfigurasi Django + Silk + JWT
+│   ├── urls.py               # URL routing (/admin, /silk/, /api/)
 │   └── wsgi.py               # WSGI entry point
-├── courses/                  # App utama LMS
+├── courses/                  # App data model LMS
 │   ├── models.py             # Data models (User, Course, Lesson, dll)
 │   ├── managers.py           # Custom QuerySet & Manager
 │   ├── admin.py              # Konfigurasi Django Admin
 │   ├── views.py              # Endpoint baseline & optimized (Lab 5)
 │   ├── urls.py               # Route endpoint lab
 │   └── migrations/           # File migrasi database
+├── api/                      # App REST API
+│   ├── schemas.py            # Pydantic schemas (validasi input/output)
+│   ├── auth.py               # JWT utilities + JWTAuth middleware
+│   ├── permissions.py        # RBAC decorators (@is_instructor, dll)
+│   ├── main.py               # NinjaAPI instance + router registration
+│   └── routers/
+│       ├── auth_router.py    # /api/auth/* endpoints
+│       ├── course_router.py  # /api/courses/* endpoints
+│       └── enrollment_router.py  # /api/enrollments/* endpoints
 ├── scripts/
 │   ├── seed_data.py          # Script seed data awal
 │   ├── seed_lab.py           # Script seed data skala besar (100+ course)
@@ -115,8 +129,6 @@ User (role: admin/instructor/student)
 
 ### Database Indexes
 
-Index ditambahkan pada kolom yang sering dipakai untuk `filter()` dan `order_by()`:
-
 | Index | Model | Kolom | Alasan |
 |---|---|---|---|
 | `idx_course_slug` | Course | `slug` | Lookup by slug di URL routing |
@@ -160,52 +172,21 @@ Data diukur langsung dari Django Silk dengan dataset 100+ courses.
 ### Analisis N+1 Problem
 
 #### Skenario 1 — Course List + Teacher (101 queries)
-
 ```
-Baseline:
-  courses = Course.objects.all()           → 1 query (SELECT * FROM lms_course)
-  for course in courses:
-      course.instructor.username           → 1 query PER COURSE (SELECT * FROM lms_user WHERE id=?)
-                                           → 100 courses = 100 query tambahan
-  Total: 1 + 100 = 101 queries
-
-Optimized:
-  courses = Course.objects.select_related('instructor').all()
-  → 1 query JOIN (SELECT course.*, user.* FROM lms_course INNER JOIN lms_user ...)
-  Total: 1 query
+Baseline:  1 query (SELECT course) + 100 query (SELECT user WHERE id=?) = 101 queries
+Optimized: 1 query JOIN (SELECT course.* INNER JOIN lms_user) = 1 query
 ```
 
 #### Skenario 2 — Course + Members + Lessons (301 queries)
-
 ```
-Baseline:
-  1 query   : ambil semua course
-  100 query : course.instructor per course     (N+1)
-  100 query : Enrollment.filter(course=c)      (N+1)
-  100 query : Lesson.filter(course=c)          (N+1)
-  Total: 1 + 300 = 301 queries
-
-Optimized:
-  1 query : course + instructor (select_related JOIN)
-  1 query : semua lessons (prefetch_related IN clause)
-  + annotate enrollment_count di query pertama
-  Total: 2 queries
+Baseline:  1 + 100 (instructor) + 100 (enrollment count) + 100 (lessons) = 301 queries
+Optimized: 1 query (course+instructor JOIN) + 1 query (lessons prefetch) = 2 queries
 ```
 
 #### Skenario 3 — Statistik Dashboard (203 queries)
-
 ```
-Baseline:
-  1 query   : ambil semua course
-  100 query : Enrollment.filter(course=c).count() per course   (N+1)
-  100 query : course.instructor per course                      (N+1)
-  + beberapa query statistik terpisah
-  Total: 203 queries
-
-Optimized:
-  1 query : aggregate() → COUNT, MAX, MIN, AVG sekaligus
-  1 query : courses + annotate(enrollment_count) + select_related(instructor)
-  Total: 2 queries
+Baseline:  1 + 100 (enrollment count loop) + 100 (instructor loop) + beberapa stats = 203 queries
+Optimized: 1 query aggregate() + 1 query annotate() = 2 queries
 ```
 
 ### Teknik Optimasi yang Digunakan
@@ -222,10 +203,115 @@ Optimized:
 ### Screenshots Lab 5
 
 #### Silk — Baseline Requests
-![Silk Baseline](Screenshot/Lab5/silk_baseline.png)
+![Silk Baseline](Screenshot/Silk/2.png)
 
 #### Silk — Optimized Requests (Perbandingan)
-![Silk Optimized](Screenshot/Lab5/silk_optimized.png)
+![Silk Optimized](Screenshot/Silk/8.png)
+
+---
+
+## Progres 4 — REST API & Authentication System
+
+Membangun REST API lengkap menggunakan Django Ninja dengan JWT authentication dan role-based authorization.
+
+### Arsitektur API
+
+```
+Client (Browser / Postman)
+        │
+        ▼  Authorization: Bearer <access_token>
+┌───────────────────────────────────────┐
+│          Django Ninja API             │
+│  /api/docs  ← Swagger UI             │
+│                                       │
+│  JWTAuth → decode token → get user   │
+│  @is_instructor / @is_admin / RBAC   │
+│                                       │
+│  /api/auth/*        Auth endpoints   │
+│  /api/courses/*     Course CRUD      │
+│  /api/enrollments/* Enrollment       │
+└───────────────────────────────────────┘
+        │
+        ▼
+  PostgreSQL Database
+```
+
+### Alur JWT Authentication
+
+```
+1. POST /api/auth/login  →  { access_token, refresh_token }
+2. Simpan token di client
+3. Setiap request: Authorization: Bearer <access_token>
+4. access_token expired (1 jam) → POST /api/auth/refresh
+5. Dapat access_token baru, refresh_token berlaku 7 hari
+```
+
+### Daftar Endpoint API
+
+#### Authentication (`/api/auth/`)
+
+| Method | Endpoint | Auth | Deskripsi |
+|---|---|---|---|
+| POST | `/api/auth/register` | ❌ | Daftar user baru (student/instructor) |
+| POST | `/api/auth/login` | ❌ | Login → dapat JWT tokens |
+| POST | `/api/auth/refresh` | ❌ | Refresh access token |
+| GET | `/api/auth/me` | ✅ | Ambil profil user login |
+| PUT | `/api/auth/me` | ✅ | Update profil |
+
+#### Courses — Public (`/api/courses/`)
+
+| Method | Endpoint | Auth | Deskripsi |
+|---|---|---|---|
+| GET | `/api/courses` | ❌ | List course (pagination + filter + search) |
+| GET | `/api/courses/{id}` | ❌ | Detail course + daftar lesson |
+
+#### Courses — Protected
+
+| Method | Endpoint | Auth | Role | Deskripsi |
+|---|---|---|---|---|
+| POST | `/api/courses` | ✅ | instructor | Buat course baru |
+| PATCH | `/api/courses/{id}` | ✅ | owner/admin | Update course |
+| DELETE | `/api/courses/{id}` | ✅ | admin | Hapus course |
+
+#### Enrollments (`/api/enrollments/`)
+
+| Method | Endpoint | Auth | Role | Deskripsi |
+|---|---|---|---|---|
+| POST | `/api/enrollments` | ✅ | student | Daftar ke course |
+| GET | `/api/enrollments/my-courses` | ✅ | semua | Daftar course + progress |
+| POST | `/api/enrollments/{id}/progress` | ✅ | semua | Tandai lesson selesai |
+
+### Role-Based Access Control (RBAC)
+
+| Role | Hak Akses |
+|---|---|
+| `student` | Lihat course publik, enroll, update progress sendiri |
+| `instructor` | + Buat course, edit course milik sendiri |
+| `admin` | Semua akses + hapus course manapun |
+
+Implementasi menggunakan decorator:
+```python
+@is_instructor   # Hanya instructor/admin
+@is_student      # Hanya student/admin  
+@is_admin        # Hanya admin
+@is_course_owner # Instructor pemilik course atau admin
+```
+
+### Pydantic Schemas (Validasi Otomatis)
+
+| Schema | Dipakai di | Validasi |
+|---|---|---|
+| `RegisterSchema` | POST /register | username min 3 char, password match, role valid |
+| `LoginSchema` | POST /login | username + password |
+| `TokenSchema` | Response login/refresh | access_token, refresh_token, expires_in |
+| `CourseCreateSchema` | POST /courses | title tidak kosong, level valid, price ≥ 0 |
+| `CourseListSchema` | GET /courses | pagination: items, total, page, total_pages |
+| `EnrollmentDetailSchema` | GET /my-courses | progress list, completion_percentage |
+
+### Screenshots
+
+#### Swagger UI — API Documentation
+![Swagger UI](Screenshot/Progres_3/1.png)
 
 ---
 
@@ -247,7 +333,7 @@ cd simple-lms
 
 ```bash
 cp .env.example .env
-# Edit .env sesuai kebutuhan (terutama SECRET_KEY dan password)
+# Edit .env — pastikan isi JWT_SECRET_KEY
 ```
 
 ### 3. Jalankan Docker Compose
@@ -283,14 +369,15 @@ docker compose exec web python scripts/seed_lab.py
 
 | URL | Deskripsi |
 |---|---|
-| http://localhost:8000/admin | Django Admin |
-| http://localhost:8000/silk/ | Django Silk profiling dashboard |
-| http://localhost:8000/lab/course-list/baseline/ | Endpoint baseline skenario 1 |
-| http://localhost:8000/lab/course-list/optimized/ | Endpoint optimized skenario 1 |
-| http://localhost:8000/lab/course-members/baseline/ | Endpoint baseline skenario 2 |
-| http://localhost:8000/lab/course-members/optimized/ | Endpoint optimized skenario 2 |
-| http://localhost:8000/lab/course-dashboard/baseline/ | Endpoint baseline skenario 3 |
-| http://localhost:8000/lab/course-dashboard/optimized/ | Endpoint optimized skenario 3 |
+| `http://localhost:8000/admin` | Django Admin |
+| `http://localhost:8000/api/docs` | Swagger UI — REST API Documentation |
+| `http://localhost:8000/silk/` | Django Silk profiling dashboard |
+| `http://localhost:8000/lab/course-list/baseline/` | Endpoint baseline skenario 1 |
+| `http://localhost:8000/lab/course-list/optimized/` | Endpoint optimized skenario 1 |
+| `http://localhost:8000/lab/course-members/baseline/` | Endpoint baseline skenario 2 |
+| `http://localhost:8000/lab/course-members/optimized/` | Endpoint optimized skenario 2 |
+| `http://localhost:8000/lab/course-dashboard/baseline/` | Endpoint baseline skenario 3 |
+| `http://localhost:8000/lab/course-dashboard/optimized/` | Endpoint optimized skenario 3 |
 
 ### Perintah Berguna
 
@@ -329,7 +416,8 @@ docker compose down -v
 | `DB_PASSWORD` | Password database | string kuat |
 | `DB_HOST` | Hostname database | `db` (nama service Docker) |
 | `DB_PORT` | Port database | `5432` |
+| `JWT_SECRET_KEY` | Secret key untuk signing JWT token | string acak panjang |
 
 ---
 
-*Latihan Optimisasi DB — Universitas Dian Nuswantoro*
+*Pemrograman Sisi Server — Universitas Dian Nuswantoro*

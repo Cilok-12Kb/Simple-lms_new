@@ -9,7 +9,7 @@
 
 ## Deskripsi
 
-Setup environment development Django untuk Simple Learning Management System menggunakan Docker dan PostgreSQL, dilengkapi dengan data model LMS, query optimization menggunakan Django Silk profiling, REST API dengan Django Ninja, dan JWT Authentication & Authorization.
+Setup environment development Django untuk Simple Learning Management System menggunakan Docker dan PostgreSQL, dilengkapi dengan data model LMS, query optimization menggunakan Django Silk profiling, REST API dengan Django Ninja, serta JWT Authentication & Authorization dengan ninja-simple-jwt.
 
 ## Tech Stack
 
@@ -23,8 +23,7 @@ Setup environment development Django untuk Simple Learning Management System men
 | Pillow | 10.2.0 | Image field support |
 | django-silk | 5.0.3 | Query profiling & benchmarking |
 | django-ninja | 1.1.0 | REST API framework (Pydantic-based) |
-| PyJWT | 2.8.0 | JWT token generation & validation |
-| passlib[bcrypt] | 1.7.4 | Password hashing |
+| django-ninja-simple-jwt | 0.6.0 | JWT authentication dengan RSA keys |
 | email-validator | 2.1.1 | Validasi format email di Pydantic |
 
 ## Struktur Project
@@ -37,8 +36,10 @@ simple-lms/
 ├── requirements.txt          # Python dependencies
 ├── manage.py                 # Django CLI tool
 ├── postman_collection.json   # Postman collection untuk testing API
+├── private_key.pem           # RSA private key (TIDAK di-commit ke Git)
+├── public_key.pem            # RSA public key (TIDAK di-commit ke Git)
 ├── config/
-│   ├── settings.py           # Konfigurasi Django + Silk + JWT
+│   ├── settings.py           # Konfigurasi Django + Silk + ninja-simple-jwt
 │   ├── urls.py               # URL routing (/admin, /silk/, /api/)
 │   └── wsgi.py               # WSGI entry point
 ├── courses/                  # App data model LMS
@@ -50,11 +51,10 @@ simple-lms/
 │   └── migrations/           # File migrasi database
 ├── api/                      # App REST API
 │   ├── schemas.py            # Pydantic schemas (validasi input/output)
-│   ├── auth.py               # JWT utilities + JWTAuth middleware
-│   ├── permissions.py        # RBAC decorators (@is_instructor, dll)
+│   ├── helpers.py            # Helper functions untuk authorization checks
 │   ├── main.py               # NinjaAPI instance + router registration
 │   └── routers/
-│       ├── auth_router.py    # /api/auth/* endpoints
+│       ├── auth_router.py    # /api/register/, /api/me/
 │       ├── course_router.py  # /api/courses/* endpoints
 │       └── enrollment_router.py  # /api/enrollments/* endpoints
 ├── scripts/
@@ -159,8 +159,6 @@ Profiling dan optimasi 3 endpoint menggunakan Django Silk. Membuktikan N+1 probl
 
 ### Hasil Perbandingan Silk
 
-Data diukur langsung dari Django Silk dengan dataset 100+ courses.
-
 | Kasus | Endpoint Baseline | Endpoint Optimized | Query Baseline | Query Optimized | Waktu Baseline | Waktu Optimized | Query Improvement | Waktu Improvement | Teknik |
 |---|---|---|---|---|---|---|---|---|---|
 | Course + Teacher | `/lab/course-list/baseline/` | `/lab/course-list/optimized/` | **101 queries** | **1 query** | 541ms | 39ms | **99%** | **93%** | `select_related` |
@@ -185,133 +183,167 @@ Optimized: 1 query (course+instructor JOIN) + 1 query (lessons prefetch) = 2 que
 
 #### Skenario 3 — Statistik Dashboard (203 queries)
 ```
-Baseline:  1 + 100 (enrollment count loop) + 100 (instructor loop) + beberapa stats = 203 queries
+Baseline:  1 + 100 (enrollment count loop) + 100 (instructor loop) + stats = 203 queries
 Optimized: 1 query aggregate() + 1 query annotate() = 2 queries
 ```
-
-### Teknik Optimasi yang Digunakan
-
-| Teknik | Kapan Dipakai | Contoh |
-|---|---|---|
-| `select_related` | ForeignKey (many-to-one) | `Course → instructor` |
-| `prefetch_related` | Reverse FK / ManyToMany | `Course → lessons` |
-| `annotate(Count)` | Hitung relasi di database | Jumlah enrollment per course |
-| `aggregate()` | Statistik global | MAX, MIN, AVG, COUNT sekaligus |
-| `bulk_create` | Insert banyak record | Seed 100 course dalam 1 query |
-| `QuerySet.update(F())` | Update massal | Naikkan harga semua course |
 
 ### Screenshots Lab 5
 
 #### Silk — Baseline Requests
 ![Silk Baseline](Screenshot/Silk/2.png)
 
-#### Silk — Optimized Requests (Perbandingan)
+#### Silk — Optimized Requests
 ![Silk Optimized](Screenshot/Silk/8.png)
 
 ---
 
-## Progres 4 — REST API & Authentication System
+## Progres 4 — REST API dengan Django Ninja
 
-Membangun REST API lengkap menggunakan Django Ninja dengan JWT authentication dan role-based authorization.
-
-### Arsitektur API
-
-```
-Client (Browser / Postman)
-        │
-        ▼  Authorization: Bearer <access_token>
-┌───────────────────────────────────────┐
-│          Django Ninja API             │
-│  /api/docs  ← Swagger UI             │
-│                                       │
-│  JWTAuth → decode token → get user   │
-│  @is_instructor / @is_admin / RBAC   │
-│                                       │
-│  /api/auth/*        Auth endpoints   │
-│  /api/courses/*     Course CRUD      │
-│  /api/enrollments/* Enrollment       │
-└───────────────────────────────────────┘
-        │
-        ▼
-  PostgreSQL Database
-```
-
-### Alur JWT Authentication
-
-```
-1. POST /api/auth/login  →  { access_token, refresh_token }
-2. Simpan token di client
-3. Setiap request: Authorization: Bearer <access_token>
-4. access_token expired (1 jam) → POST /api/auth/refresh
-5. Dapat access_token baru, refresh_token berlaku 7 hari
-```
+Membangun REST API menggunakan Django Ninja dengan Pydantic schemas dan Swagger UI.
 
 ### Daftar Endpoint API
 
-#### Authentication (`/api/auth/`)
+#### Authentication
 
 | Method | Endpoint | Auth | Deskripsi |
 |---|---|---|---|
-| POST | `/api/auth/register` | ❌ | Daftar user baru (student/instructor) |
-| POST | `/api/auth/login` | ❌ | Login → dapat JWT tokens |
-| POST | `/api/auth/refresh` | ❌ | Refresh access token |
-| GET | `/api/auth/me` | ✅ | Ambil profil user login |
-| PUT | `/api/auth/me` | ✅ | Update profil |
+| POST | `/api/register/` | ❌ | Daftar user baru |
+| POST | `/api/auth/sign-in` | ❌ | Login → dapat JWT tokens |
+| POST | `/api/auth/token-refresh` | ❌ | Refresh access token |
+| GET | `/api/me/` | ✅ | Ambil profil user login |
+| PUT | `/api/me/` | ✅ | Update profil |
 
-#### Courses — Public (`/api/courses/`)
+#### Courses
 
 | Method | Endpoint | Auth | Deskripsi |
 |---|---|---|---|
-| GET | `/api/courses` | ❌ | List course (pagination + filter + search) |
-| GET | `/api/courses/{id}` | ❌ | Detail course + daftar lesson |
+| GET | `/api/courses` | ❌ | List course (pagination + filter) |
+| GET | `/api/courses/{id}` | ❌ | Detail course |
+| POST | `/api/courses` | ✅ | Buat course (owner = user login) |
+| PUT | `/api/courses/{id}` | ✅ | Update course (owner only) |
+| DELETE | `/api/courses/{id}` | ✅ | Hapus course (owner/superadmin) |
 
-#### Courses — Protected
+#### Enrollments
 
-| Method | Endpoint | Auth | Role | Deskripsi |
-|---|---|---|---|---|
-| POST | `/api/courses` | ✅ | instructor | Buat course baru |
-| PATCH | `/api/courses/{id}` | ✅ | owner/admin | Update course |
-| DELETE | `/api/courses/{id}` | ✅ | admin | Hapus course |
-
-#### Enrollments (`/api/enrollments/`)
-
-| Method | Endpoint | Auth | Role | Deskripsi |
-|---|---|---|---|---|
-| POST | `/api/enrollments` | ✅ | student | Daftar ke course |
-| GET | `/api/enrollments/my-courses` | ✅ | semua | Daftar course + progress |
-| POST | `/api/enrollments/{id}/progress` | ✅ | semua | Tandai lesson selesai |
-
-### Role-Based Access Control (RBAC)
-
-| Role | Hak Akses |
-|---|---|
-| `student` | Lihat course publik, enroll, update progress sendiri |
-| `instructor` | + Buat course, edit course milik sendiri |
-| `admin` | Semua akses + hapus course manapun |
-
-Implementasi menggunakan decorator:
-```python
-@is_instructor   # Hanya instructor/admin
-@is_student      # Hanya student/admin  
-@is_admin        # Hanya admin
-@is_course_owner # Instructor pemilik course atau admin
-```
-
-### Pydantic Schemas (Validasi Otomatis)
-
-| Schema | Dipakai di | Validasi |
-|---|---|---|
-| `RegisterSchema` | POST /register | username min 3 char, password match, role valid |
-| `LoginSchema` | POST /login | username + password |
-| `TokenSchema` | Response login/refresh | access_token, refresh_token, expires_in |
-| `CourseCreateSchema` | POST /courses | title tidak kosong, level valid, price ≥ 0 |
-| `CourseListSchema` | GET /courses | pagination: items, total, page, total_pages |
-| `EnrollmentDetailSchema` | GET /my-courses | progress list, completion_percentage |
+| Method | Endpoint | Auth | Deskripsi |
+|---|---|---|---|
+| POST | `/api/enrollments` | ✅ | Daftar ke course |
+| GET | `/api/enrollments/my-courses` | ✅ | Daftar course saya |
+| POST | `/api/enrollments/{id}/progress` | ✅ | Tandai lesson selesai |
 
 ### Screenshots
 
 #### Swagger UI — API Documentation
 ![Swagger UI](Screenshot/Progres_3/1.png)
+
+---
+
+## Progres 5 — Authentication & Authorization (Chapter 7)
+
+Implementasi sistem authentication dan authorization yang aman menggunakan `ninja-simple-jwt` dengan RSA keys dan Role-Based Access Control (RBAC).
+
+### Perubahan dari Progres 4
+
+| Aspek | Progres 4 (PyJWT manual) | Progres 5 (ninja-simple-jwt) |
+|---|---|---|
+| Library | `PyJWT`, `passlib` | `django-ninja-simple-jwt` |
+| Algoritma signing | HS256 (symmetric) | RSA (asymmetric, lebih aman) |
+| Login endpoint | Ditulis manual | Otomatis dari `mobile_auth_router` |
+| Key management | Secret key di `.env` | RSA key pair (`private_key.pem`, `public_key.pem`) |
+| Token verification | Manual decode | Otomatis oleh `HttpJwtAuth` |
+
+### Arsitektur Authentication
+
+```
+Client
+  │
+  ├─ POST /api/auth/sign-in ─────────────┐
+  │                                      ▼
+  │                           ninja-simple-jwt
+  │                           verifikasi user
+  │                           generate RSA-signed tokens
+  │   { "access": "eyJ...", "refresh": "eyJ..." }
+  │◄─────────────────────────────────────┘
+  │
+  ├─ GET /api/me/ ────────────────────────┐
+  │   Authorization: Bearer <access>      │
+  │                                       ▼
+  │                             HttpJwtAuth.authenticate()
+  │                             verify RSA signature
+  │                             set request.user
+  │   { "id": 1, "username": "..." }      │
+  │◄──────────────────────────────────────┘
+```
+
+### Alur JWT (Chapter 7)
+
+```
+1. POST /api/auth/sign-in       → { "access": "...", "refresh": "..." }
+2. Setiap request protected:    Authorization: Bearer <access_token>
+3. HttpJwtAuth verifikasi RSA signature → set request.user
+4. Access token expired         → POST /api/auth/token-refresh
+5. Dapat access token baru tanpa login ulang
+```
+
+### Role-Based Access Control (RBAC)
+
+| Role | Create Course | Edit Course | Delete Course | Enroll | Update Progress |
+|---|---|---|---|---|---|
+| Guest (tidak login) | ❌ 401 | ❌ 401 | ❌ 401 | ❌ 401 | ❌ 401 |
+| Authenticated User | ✅ | ✅ (milik sendiri) | ✅ (milik sendiri) | ✅ | ✅ (milik sendiri) |
+| Superadmin | ✅ | ✅ (semua) | ✅ (semua) | ✅ | ✅ |
+
+Authorization diimplementasikan via **helper functions** di `api/helpers.py`:
+
+```python
+get_authenticated_user(request)        # ambil user dari token
+check_course_owner(course, user)       # 403 jika bukan owner
+check_owner_or_superadmin(owner, user) # 403 jika bukan owner/superadmin
+check_enrollment(user, course)         # 403 jika tidak enrolled
+```
+
+### Matriks HTTP Status Code
+
+| Endpoint | Tanpa Token | Token Valid | Pemilik/Superadmin |
+|---|---|---|---|
+| `GET /api/courses` | ✅ 200 | ✅ 200 | ✅ 200 |
+| `POST /api/courses` | ❌ 401 | ✅ 201 | ✅ 201 |
+| `PUT /api/courses/{id}` | ❌ 401 | ❌ 403 | ✅ 200 |
+| `DELETE /api/courses/{id}` | ❌ 401 | ❌ 403 | ✅ 200 |
+| `GET /api/me/` | ❌ 401 | ✅ 200 | ✅ 200 |
+| `POST /api/enrollments` | ❌ 401 | ✅ 201 | ✅ 201 |
+
+### HTTP Status Code Reference
+
+| Kode | Nama | Kapan Dipakai |
+|---|---|---|
+| 200 | OK | Request berhasil |
+| 201 | Created | Register berhasil, course dibuat |
+| 400 | Bad Request | Duplikasi username/email, sudah enrolled |
+| 401 | Unauthorized | Tidak ada token / token invalid / expired |
+| 403 | Forbidden | Token valid tapi tidak punya izin |
+| 404 | Not Found | Resource tidak ditemukan |
+
+### Security Best Practices (Chapter 7 Section 8)
+
+- **Password hashing** — `create_user()` bukan `create()` → PBKDF2+SHA256 otomatis
+- **RSA asymmetric keys** — private key untuk sign, public key untuk verify
+- **RSA keys di `.gitignore`** — `private_key.pem` tidak pernah di-commit
+- **JWT payload minimal** — hanya `user_id`, tidak menyimpan password atau data sensitif
+- **Token expiration** — access token pendek, refresh token lebih panjang
+- **Input validation** — Pydantic Schema validasi otomatis, 422 jika format salah
+
+### Testing 6 Skenario Wajib (Chapter 7)
+
+| # | Skenario | Endpoint | Expected Result |
+|---|---|---|---|
+| 1 | Register user baru | `POST /api/register/` | 201 + data user (tanpa password) |
+| 2 | Login dan dapat token | `POST /api/auth/sign-in` | 200 + access + refresh token |
+| 3 | Akses dengan token valid | `GET /api/me/` | 200 + profil user |
+| 4 | Akses tanpa token | `GET /api/me/` | 401 Unauthorized |
+| 5 | Aksi yang diizinkan | `POST /api/courses` | 201 Created |
+| 6 | Aksi yang ditolak | `PUT /api/courses/{id_milik_orang_lain}` | 403 Forbidden |
+
 
 ---
 
@@ -333,7 +365,7 @@ cd simple-lms
 
 ```bash
 cp .env.example .env
-# Edit .env — pastikan isi JWT_SECRET_KEY
+# Edit .env sesuai kebutuhan
 ```
 
 ### 3. Jalankan Docker Compose
@@ -349,13 +381,19 @@ docker compose exec web python manage.py makemigrations courses
 docker compose exec web python manage.py migrate
 ```
 
-### 5. Buat Superuser
+### 5. Generate RSA Keys (sekali saja)
+
+```bash
+docker compose exec web python manage.py make_rsa
+```
+
+### 6. Buat Superuser
 
 ```bash
 docker compose exec web python manage.py createsuperuser
 ```
 
-### 6. Seed Data Awal
+### 7. Seed Data Awal
 
 ```bash
 # Seed data standar
@@ -365,7 +403,7 @@ docker compose exec web python scripts/seed_data.py
 docker compose exec web python scripts/seed_lab.py
 ```
 
-### 7. Buka di Browser
+### 8. Buka di Browser
 
 | URL | Deskripsi |
 |---|---|
@@ -416,7 +454,6 @@ docker compose down -v
 | `DB_PASSWORD` | Password database | string kuat |
 | `DB_HOST` | Hostname database | `db` (nama service Docker) |
 | `DB_PORT` | Port database | `5432` |
-| `JWT_SECRET_KEY` | Secret key untuk signing JWT token | string acak panjang |
 
 ---
 

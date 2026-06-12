@@ -1,201 +1,122 @@
 """
 api/routers/enrollment_router.py
-Endpoint Enrollments:
-- POST /api/enrollments                      - Daftar ke course (Student)
-- GET  /api/enrollments/my-courses           - Daftar course saya
-- POST /api/enrollments/{id}/progress        - Tandai lesson selesai
+Enrollment endpoints dengan authentication & authorization.
+
+Sesuai Chapter 7:
+- Section 6.3: Enroll ke Course
+- Section 6.4: Get My Courses
+- Section 7.3–7.5: Authorization checks
 """
-from django.db import IntegrityError
+from typing import List
+from django.contrib.auth import get_user_model
 from django.utils import timezone
 from ninja import Router
 from ninja.errors import HttpError
 
 from courses.models import Course, Enrollment, Progress, Lesson
 from api.schemas import (
-    EnrollSchema, EnrollmentOutSchema, EnrollmentDetailSchema,
-    ProgressUpdateSchema, ProgressOutSchema, MessageSchema, ErrorSchema
+    EnrollSchema, EnrollmentOut, ProgressUpdateSchema,
+    ProgressOut, MessageOut,
 )
-from api.auth import jwt_auth
-from api.permissions import is_student
+from api.helpers import get_authenticated_user, check_enrollment
 
+User = get_user_model()
 router = Router(tags=['Enrollments'])
 
 
-@router.post('', auth=jwt_auth, response={201: EnrollmentOutSchema, 400: ErrorSchema, 403: ErrorSchema})
-@is_student
+@router.post('', auth=True, response={201: EnrollmentOut, 400: MessageOut, 404: MessageOut})
 def enroll_course(request, data: EnrollSchema):
     """
     Daftar ke course.
-    
-    **Membutuhkan role: student**
-    
-    Satu student hanya bisa mendaftar ke satu course satu kali
-    (unique constraint di database akan mencegah duplikat).
-    """
-    user = request.auth
 
-    # Cek course ada dan sudah published
+    Sesuai Chapter 7 Section 6.3:
+    - auth=True: butuh token
+    - Cek duplikasi enrollment sebelum create
+
+    Catatan: di chapter 7, semua authenticated user bisa enroll.
+    Tidak dibatasi role 'student' saja.
+    """
+    # Sesuai Chapter 7: user dari request.user
+    user = get_authenticated_user(request)
+
     try:
-        course = Course.objects.select_related('instructor', 'category').get(
-            id=data.course_id,
-            is_published=True
-        )
+        course = Course.objects.select_related(
+            'instructor', 'category'
+        ).get(id=data.course_id, is_published=True)
     except Course.DoesNotExist:
         raise HttpError(404, "Course tidak ditemukan atau belum dipublikasikan")
 
-    # Cek sudah pernah enrollment
+    # Cek sudah terdaftar — sesuai Chapter 7 Section 6.3
     if Enrollment.objects.filter(student=user, course=course).exists():
-        raise HttpError(400, f"Kamu sudah terdaftar di course '{course.title}'")
+        raise HttpError(400, f"Anda sudah terdaftar di course '{course.title}'")
 
-    try:
-        enrollment = Enrollment.objects.create(
-            student=user,
-            course=course,
-            status='active',
-        )
-    except IntegrityError:
-        raise HttpError(400, "Kamu sudah terdaftar di course ini")
-
-    return 201, EnrollmentOutSchema(
-        id=enrollment.id,
-        course=CourseOutFromEnrollment(course),
-        status=enrollment.status,
-        enrolled_at=enrollment.enrolled_at,
-        completed_at=enrollment.completed_at,
+    enrollment = Enrollment.objects.create(
+        student=user,
+        course=course,
+        status='active',
     )
 
-
-def CourseOutFromEnrollment(course):
-    """Helper untuk build CourseOutSchema dari course object."""
-    from api.schemas import CourseOutSchema
-    return CourseOutSchema(
-        id=course.id,
-        title=course.title,
-        slug=course.slug,
-        description=course.description,
-        level=course.level,
-        price=float(course.price),
-        is_published=course.is_published,
-        instructor=course.instructor,
-        category=course.category,
-        total_lessons=course.lessons.count(),
-        total_enrollments=course.enrollments.count(),
-        created_at=course.created_at,
-    )
+    return 201, enrollment
 
 
-@router.get('/my-courses', auth=jwt_auth, response=list[EnrollmentDetailSchema])
-def my_courses(request):
+@router.get('/my-courses', auth=True, response=List[EnrollmentOut])
+def get_my_courses(request):
     """
-    Ambil semua course yang sudah saya daftarkan beserta progress belajar.
-    
-    **Membutuhkan token** (semua role bisa akses data miliknya sendiri)
+    Daftar course yang saya ikuti.
+
+    Sesuai Chapter 7 Section 6.4:
+    - auth=True: hanya user yang login
+    - select_related untuk hindari N+1 (sesuai materi Modul 5)
     """
-    from django.db.models import Count, Q
+    user = get_authenticated_user(request)
 
-    user = request.auth
-
-    enrollments = Enrollment.objects.filter(
+    # Sesuai Chapter 7 Section 6.4 — gunakan select_related
+    my_enrollments = Enrollment.objects.filter(
         student=user
     ).select_related(
         'course__instructor',
         'course__category',
-    ).prefetch_related(
-        'progress_records__lesson',
-    ).annotate(
-        completed_count=Count(
-            'progress_records',
-            filter=Q(progress_records__is_completed=True)
-        ),
-        total_lessons_count=Count('course__lessons', distinct=True),
     )
 
-    result = []
-    for enrollment in enrollments:
-        progress_list = []
-        for p in enrollment.progress_records.all().order_by('lesson__order'):
-            progress_list.append(ProgressOutSchema(
-                lesson_id=p.lesson.id,
-                lesson_title=p.lesson.title,
-                is_completed=p.is_completed,
-                completed_at=p.completed_at,
-                last_position_seconds=p.last_position_seconds,
-            ))
-
-        total = enrollment.total_lessons_count
-        completed = enrollment.completed_count
-        pct = round((completed / total * 100), 1) if total > 0 else 0.0
-
-        result.append(EnrollmentDetailSchema(
-            id=enrollment.id,
-            course=CourseOutFromEnrollment(enrollment.course),
-            status=enrollment.status,
-            enrolled_at=enrollment.enrolled_at,
-            completed_at=enrollment.completed_at,
-            progress=progress_list,
-            completed_lessons=completed,
-            total_lessons=total,
-            completion_percentage=pct,
-        ))
-
-    return result
+    return list(my_enrollments)
 
 
-@router.post('/{enrollment_id}/progress', auth=jwt_auth, response={200: ProgressOutSchema, 400: ErrorSchema, 403: ErrorSchema, 404: ErrorSchema})
+@router.post('/{enrollment_id}/progress', auth=True, response={200: ProgressOut, 403: MessageOut, 404: MessageOut})
 def update_progress(request, enrollment_id: int, data: ProgressUpdateSchema):
     """
     Tandai lesson sebagai selesai atau update posisi video.
-    
-    **Membutuhkan token** — hanya pemilik enrollment yang bisa update.
-    
-    Body:
-    - **lesson_id**: ID lesson yang ingin di-update
-    - **is_completed**: true jika lesson sudah selesai
-    - **last_position_seconds**: posisi terakhir video (untuk resume)
+
+    Authorization: hanya pemilik enrollment yang bisa update progress.
     """
-    user = request.auth
+    user = get_authenticated_user(request)
 
     # Cek enrollment milik user ini
-    try:
-        enrollment = Enrollment.objects.get(id=enrollment_id, student=user)
-    except Enrollment.DoesNotExist:
+    enrollment = Enrollment.objects.filter(id=enrollment_id, student=user).first()
+    if enrollment is None:
         raise HttpError(404, "Enrollment tidak ditemukan")
 
-    # Cek lesson ada dan milik course yang sama
-    try:
-        lesson = Lesson.objects.get(id=data.lesson_id, course=enrollment.course)
-    except Lesson.DoesNotExist:
+    # Cek lesson ada di course ini
+    lesson = Lesson.objects.filter(
+        id=data.lesson_id, course=enrollment.course
+    ).first()
+    if lesson is None:
         raise HttpError(404, "Lesson tidak ditemukan di course ini")
 
-    # Get or create progress record
-    progress, created = Progress.objects.get_or_create(
+    # Get or create progress
+    progress, _ = Progress.objects.get_or_create(
         enrollment=enrollment,
         lesson=lesson,
-        defaults={
-            'is_completed': False,
-            'last_position_seconds': 0,
-        }
+        defaults={'is_completed': False, 'last_position_seconds': 0},
     )
 
-    # Update progress
-    update_fields = ['last_position_seconds']
     progress.last_position_seconds = data.last_position_seconds
-
     if data.is_completed and not progress.is_completed:
         progress.is_completed = True
         progress.completed_at = timezone.now()
-        update_fields.extend(['is_completed', 'completed_at'])
 
-    progress.save(update_fields=update_fields)
+    progress.save()
 
-    # Cek apakah semua lesson sudah selesai → tandai enrollment completed
-    total_lessons = enrollment.course.lessons.count()
-    completed_lessons = enrollment.progress_records.filter(is_completed=True).count()
-
-    if total_lessons > 0 and completed_lessons >= total_lessons:
-        enrollment.mark_completed()
-
-    return ProgressOutSchema(
+    return ProgressOut(
         lesson_id=lesson.id,
         lesson_title=lesson.title,
         is_completed=progress.is_completed,

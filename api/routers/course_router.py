@@ -1,180 +1,91 @@
 """
 api/routers/course_router.py
-Endpoint Courses:
-Public:
-  GET  /api/courses          - List courses (pagination + filter)
-  GET  /api/courses/{id}     - Detail course
+Course endpoints dengan authentication & authorization.
 
-Protected:
-  POST   /api/courses        - Buat course baru (Instructor)
-  PATCH  /api/courses/{id}   - Update course (Owner/Admin)
-  DELETE /api/courses/{id}   - Hapus course (Admin only)
+Sesuai Chapter 7:
+- Section 6: Protecting Endpoints (auth=apiAuth)
+- Section 7.6: Authorization CRUD Course
 """
-from typing import Optional
+from typing import Optional, List
+from django.contrib.auth import get_user_model
 from django.utils.text import slugify
 from ninja import Router, Query
 from ninja.errors import HttpError
 
-from courses.models import Course, Category, Lesson
-from api.schemas import (
-    CourseOutSchema, CourseDetailSchema, CourseListSchema,
-    CourseCreateSchema, CourseUpdateSchema, MessageSchema, ErrorSchema,
-    LessonOutSchema
+from courses.models import Course, Category
+from api.schemas import CourseOut, CourseIn, CourseUpdateSchema, MessageOut
+from api.helpers import (
+    get_authenticated_user,
+    check_course_owner,
+    check_owner_or_superadmin,
 )
-from api.auth import jwt_auth
-from api.permissions import is_instructor, is_admin, is_course_owner
 
+User = get_user_model()
 router = Router(tags=['Courses'])
 
 
 # ─────────────────────────────────────────────────────────────
-# PUBLIC ENDPOINTS (tidak butuh token)
+# PUBLIC ENDPOINTS — tidak butuh token
 # ─────────────────────────────────────────────────────────────
 
-@router.get('', response=CourseListSchema)
+@router.get('', response=List[CourseOut])
 def list_courses(
     request,
-    page: int = Query(1, description="Nomor halaman (mulai dari 1)"),
-    page_size: int = Query(10, description="Jumlah item per halaman (max 50)"),
-    search: Optional[str] = Query(None, description="Cari berdasarkan judul course"),
-    level: Optional[str] = Query(None, description="Filter: beginner/intermediate/advanced"),
-    category_id: Optional[int] = Query(None, description="Filter berdasarkan ID kategori"),
-    ordering: Optional[str] = Query('-created_at', description="Urutan: created_at, -created_at, price, -price, title"),
+    page: int = Query(1),
+    page_size: int = Query(10),
+    search: Optional[str] = Query(None),
+    level: Optional[str] = Query(None),
 ):
     """
-    Ambil daftar course yang sudah dipublikasikan dengan pagination dan filter.
-    
-    Endpoint ini **tidak memerlukan token** — bisa diakses publik.
+    List semua course yang published — PUBLIK, tidak butuh token.
     """
     from django.db.models import Count
 
-    # Validasi
-    page_size = min(page_size, 50)   # Batasi max 50 per halaman
-    if page < 1:
-        page = 1
-
-    # Base queryset — hanya yang published
     qs = Course.objects.filter(is_published=True).select_related(
         'instructor', 'category'
-    ).annotate(
-        total_enrollments_count=Count('enrollments', distinct=True),
-        total_lessons_count=Count('lessons', distinct=True),
     )
 
-    # Filter pencarian
     if search:
         qs = qs.filter(title__icontains=search)
-
-    # Filter level
     if level:
         qs = qs.filter(level=level)
 
-    # Filter kategori
-    if category_id:
-        qs = qs.filter(category_id=category_id)
-
-    # Ordering
-    allowed_orderings = ['created_at', '-created_at', 'price', '-price', 'title', '-title']
-    if ordering in allowed_orderings:
-        qs = qs.order_by(ordering)
-
-    # Hitung total
-    total = qs.count()
-    total_pages = (total + page_size - 1) // page_size
-
-    # Pagination
+    page_size = min(page_size, 50)
     offset = (page - 1) * page_size
-    courses = qs[offset:offset + page_size]
-
-    # Bangun response
-    items = []
-    for course in courses:
-        items.append(CourseOutSchema(
-            id=course.id,
-            title=course.title,
-            slug=course.slug,
-            description=course.description,
-            level=course.level,
-            price=float(course.price),
-            is_published=course.is_published,
-            instructor=course.instructor,
-            category=course.category,
-            total_lessons=course.total_lessons_count,
-            total_enrollments=course.total_enrollments_count,
-            created_at=course.created_at,
-        ))
-
-    return CourseListSchema(
-        items=items,
-        total=total,
-        page=page,
-        page_size=page_size,
-        total_pages=total_pages,
-    )
+    return list(qs[offset:offset + page_size])
 
 
-@router.get('/{course_id}', response={200: CourseDetailSchema, 404: ErrorSchema})
+@router.get('/{course_id}', response={200: CourseOut, 404: MessageOut})
 def get_course(request, course_id: int):
-    """
-    Ambil detail course beserta daftar lesson.
-    
-    Endpoint ini **tidak memerlukan token**.
-    Lesson yang is_free_preview=True bisa diakses siapa saja.
-    """
+    """Detail course — PUBLIK."""
     try:
-        course = Course.objects.select_related(
+        return Course.objects.select_related(
             'instructor', 'category'
-        ).prefetch_related('lessons').get(id=course_id, is_published=True)
+        ).get(id=course_id, is_published=True)
     except Course.DoesNotExist:
         raise HttpError(404, "Course tidak ditemukan")
 
-    lessons = [
-        LessonOutSchema(
-            id=l.id,
-            title=l.title,
-            content_type=l.content_type,
-            duration_minutes=l.duration_minutes,
-            order=l.order,
-            is_free_preview=l.is_free_preview,
-        )
-        for l in course.lessons.all().order_by('order')
-    ]
-
-    return CourseDetailSchema(
-        id=course.id,
-        title=course.title,
-        slug=course.slug,
-        description=course.description,
-        level=course.level,
-        price=float(course.price),
-        is_published=course.is_published,
-        instructor=course.instructor,
-        category=course.category,
-        total_lessons=course.lessons.count(),
-        total_enrollments=course.enrollments.count(),
-        created_at=course.created_at,
-        lessons=lessons,
-    )
-
 
 # ─────────────────────────────────────────────────────────────
-# PROTECTED ENDPOINTS (butuh token)
+# PROTECTED ENDPOINTS — butuh token (auth=apiAuth)
 # ─────────────────────────────────────────────────────────────
 
-@router.post('', auth=jwt_auth, response={201: CourseOutSchema, 400: ErrorSchema, 403: ErrorSchema})
-@is_instructor
-def create_course(request, data: CourseCreateSchema):
+@router.post('', auth=True, response={201: CourseOut, 400: MessageOut, 403: MessageOut})
+def create_course(request, data: CourseIn):
     """
     Buat course baru.
-    
-    **Membutuhkan role: instructor atau admin**
-    
-    Course yang baru dibuat statusnya `is_published=False` (draft).
-    Instructor perlu mengubah ke published secara manual.
-    """
-    user = request.auth
 
-    # Generate slug dari title
+    Sesuai Chapter 7 Section 7.6:
+    - Membutuhkan: Authorization: Bearer <access_token>
+    - User yang membuat otomatis jadi instructor/owner course
+    - Semua authenticated user bisa buat course (jadi instructor)
+
+    request.user tersedia karena auth=True
+    """
+    # Ambil user dari token — sesuai Chapter 7 Section 6.2
+    user = get_authenticated_user(request)
+
+    # Generate slug unik dari title
     base_slug = slugify(data.title)
     slug = base_slug
     counter = 1
@@ -182,115 +93,92 @@ def create_course(request, data: CourseCreateSchema):
         slug = f"{base_slug}-{counter}"
         counter += 1
 
-    # Validasi category
-    category = None
-    if data.category_id:
-        try:
-            category = Category.objects.get(id=data.category_id)
-        except Category.DoesNotExist:
-            raise HttpError(400, f"Category dengan ID {data.category_id} tidak ditemukan")
-
     course = Course.objects.create(
         title=data.title,
         slug=slug,
         description=data.description,
-        instructor=user,
-        category=category,
+        instructor=user,     # User yang membuat = instructor
         level=data.level,
         price=data.price,
-        is_published=False,   # Default draft
+        is_published=False,  # Default: draft
     )
 
-    return 201, CourseOutSchema(
-        id=course.id,
-        title=course.title,
-        slug=course.slug,
-        description=course.description,
-        level=course.level,
-        price=float(course.price),
-        is_published=course.is_published,
-        instructor=course.instructor,
-        category=course.category,
-        total_lessons=0,
-        total_enrollments=0,
-        created_at=course.created_at,
-    )
+    return 201, course
 
 
-@router.patch('/{course_id}', auth=jwt_auth, response={200: CourseOutSchema, 403: ErrorSchema, 404: ErrorSchema})
-@is_course_owner
-def update_course(request, course_id: int, data: CourseUpdateSchema):
+@router.put('/{course_id}', auth=True, response={200: CourseOut, 403: MessageOut, 404: MessageOut})
+def update_course(request, course_id: int, data: CourseIn):
     """
-    Update sebagian data course.
-    
-    **Membutuhkan: instructor pemilik course, atau admin**
-    
-    Hanya field yang dikirim yang akan diupdate.
+    Update course.
+
+    Sesuai Chapter 7 Section 7.6:
+    Authorization: hanya course OWNER yang boleh edit.
+    → HttpError(403) jika bukan owner.
     """
-    try:
-        course = Course.objects.select_related('instructor', 'category').get(id=course_id)
-    except Course.DoesNotExist:
+    user = get_authenticated_user(request)
+
+    course = Course.objects.filter(id=course_id).first()
+    if course is None:
         raise HttpError(404, "Course tidak ditemukan")
 
-    update_fields = []
+    # Authorization check — sesuai Chapter 7 Section 7.6
+    check_course_owner(course, user)  # Raise 403 otomatis jika bukan owner
+
+    course.title = data.title
+    course.description = data.description
+    course.level = data.level
+    course.price = data.price
+    course.save()
+    return course
+
+
+@router.patch('/{course_id}', auth=True, response={200: CourseOut, 403: MessageOut, 404: MessageOut})
+def partial_update_course(request, course_id: int, data: CourseUpdateSchema):
+    """
+    Update sebagian field course (partial update).
+    Authorization: hanya owner atau superadmin.
+    """
+    user = get_authenticated_user(request)
+
+    course = Course.objects.filter(id=course_id).first()
+    if course is None:
+        raise HttpError(404, "Course tidak ditemukan")
+
+    check_course_owner(course, user)
 
     if data.title is not None:
         course.title = data.title
-        update_fields.append('title')
     if data.description is not None:
         course.description = data.description
-        update_fields.append('description')
     if data.level is not None:
         course.level = data.level
-        update_fields.append('level')
     if data.price is not None:
         course.price = data.price
-        update_fields.append('price')
     if data.is_published is not None:
         course.is_published = data.is_published
-        update_fields.append('is_published')
-    if data.category_id is not None:
-        try:
-            course.category = Category.objects.get(id=data.category_id)
-            update_fields.append('category')
-        except Category.DoesNotExist:
-            raise HttpError(400, "Category tidak ditemukan")
 
-    if update_fields:
-        course.save(update_fields=update_fields)
-
-    return CourseOutSchema(
-        id=course.id,
-        title=course.title,
-        slug=course.slug,
-        description=course.description,
-        level=course.level,
-        price=float(course.price),
-        is_published=course.is_published,
-        instructor=course.instructor,
-        category=course.category,
-        total_lessons=course.lessons.count(),
-        total_enrollments=course.enrollments.count(),
-        created_at=course.created_at,
-    )
+    course.save()
+    return course
 
 
-@router.delete('/{course_id}', auth=jwt_auth, response={200: MessageSchema, 403: ErrorSchema, 404: ErrorSchema})
-@is_admin
+@router.delete('/{course_id}', auth=True, response={200: MessageOut, 403: MessageOut, 404: MessageOut})
 def delete_course(request, course_id: int):
     """
-    Hapus course beserta semua data terkait (lessons, enrollments, progress).
-    
-    **Membutuhkan role: admin**
-    
-    ⚠️ Operasi ini permanen dan tidak bisa dibatalkan!
+    Hapus course.
+
+    Sesuai Chapter 7 Section 7.6:
+    Authorization: course OWNER atau SUPERADMIN.
+    → HttpError(403) jika tidak memenuhi keduanya.
     """
-    try:
-        course = Course.objects.get(id=course_id)
-    except Course.DoesNotExist:
+    user = get_authenticated_user(request)
+
+    course = Course.objects.filter(id=course_id).first()
+    if course is None:
         raise HttpError(404, "Course tidak ditemukan")
 
-    title = course.title
-    course.delete()   # CASCADE akan hapus lessons, enrollments, progress
+    # Authorization: owner ATAU superadmin — sesuai Chapter 7 Section 7.6
+    check_owner_or_superadmin(course.instructor, user)
 
-    return MessageSchema(message=f"Course '{title}' berhasil dihapus")
+    title = course.title
+    course.delete()
+    return MessageOut(message=f"Course '{title}' berhasil dihapus")

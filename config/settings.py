@@ -9,7 +9,7 @@ https://docs.djangoproject.com/en/4.2/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.2/ref/settings/
 """
-import datetime
+#import datetime
 
 from pathlib import Path
 from decouple import config
@@ -39,9 +39,10 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'courses',   # ← TAMBAHKAN INI
-    'silk',    # ← TAMBAHKAN INI (harus setelah app lain)
-    'api',    # ← TAMBAHKAN INI
+    'courses',
+    'silk',
+    'api',
+    'ninja_simple_jwt',    # ← TAMBAHKAN INI (gantikan konfigurasi JWT manual)
 ]
 
 MIDDLEWARE = [
@@ -137,7 +138,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 AUTH_USER_MODEL = 'courses.User'
 
-JWT_SECRET_KEY = config('JWT_SECRET_KEY', default='your-super-secret-jwt-key-change-this')
-JWT_ALGORITHM = 'HS256'
-JWT_ACCESS_TOKEN_EXPIRE_MINUTES = 60          # 1 jam
-JWT_REFRESH_TOKEN_EXPIRE_DAYS = 7             # 7 hari
+#JWT_SECRET_KEY = config('JWT_SECRET_KEY', default='your-super-secret-jwt-key-change-this')
+#JWT_ALGORITHM = 'HS256'
+#JWT_ACCESS_TOKEN_EXPIRE_MINUTES = 60          # 1 jam
+#JWT_REFRESH_TOKEN_EXPIRE_DAYS = 7             # 7 hari

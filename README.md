@@ -9,7 +9,7 @@
 
 ## Deskripsi
 
-Setup environment development Django untuk Simple Learning Management System menggunakan Docker dan PostgreSQL, dilengkapi dengan data model LMS, query optimization menggunakan Django Silk profiling, REST API dengan Django Ninja, serta JWT Authentication & Authorization dengan ninja-simple-jwt.
+Setup environment development Django untuk Simple Learning Management System menggunakan Docker dan PostgreSQL, dilengkapi dengan data model LMS, query optimization menggunakan Django Silk profiling, REST API dengan Django Ninja, JWT Authentication & Authorization dengan ninja-simple-jwt, serta Advanced Integration dengan Redis Caching, MongoDB Activity Logs, Celery Background Tasks, dan Rate Limiting.
 
 ## Tech Stack
 
@@ -25,12 +25,18 @@ Setup environment development Django untuk Simple Learning Management System men
 | django-ninja | 1.1.0 | REST API framework (Pydantic-based) |
 | django-ninja-simple-jwt | 0.6.0 | JWT authentication dengan RSA keys |
 | email-validator | 2.1.1 | Validasi format email di Pydantic |
+| redis | 5.0.1 | Client Python untuk Redis |
+| django-redis | 5.4.0 | Integrasi Redis dengan Django Cache Framework |
+| pymongo | 4.6.1 | Driver Python untuk MongoDB |
+| celery | ≥5.3,<6.0 | Async task queue |
+| flower | ≥2.0,<3.0 | Dashboard monitoring Celery |
+| django-ratelimit | 4.1.0 | Rate limiting per IP/user |
 
 ## Struktur Project
 
 ```
 simple-lms/
-├── docker-compose.yml        # Konfigurasi multi-container
+├── docker-compose.yml        # Konfigurasi multi-container (8 services)
 ├── Dockerfile                # Build image Django
 ├── .env.example              # Template environment variables
 ├── requirements.txt          # Python dependencies
@@ -39,7 +45,8 @@ simple-lms/
 ├── private_key.pem           # RSA private key (TIDAK di-commit ke Git)
 ├── public_key.pem            # RSA public key (TIDAK di-commit ke Git)
 ├── config/
-│   ├── settings.py           # Konfigurasi Django + Silk + ninja-simple-jwt
+│   ├── settings.py           # Konfigurasi Django + Silk + JWT + Redis + Celery
+│   ├── celery_app.py         # Inisialisasi Celery application
 │   ├── urls.py               # URL routing (/admin, /silk/, /api/)
 │   └── wsgi.py               # WSGI entry point
 ├── courses/                  # App data model LMS
@@ -52,11 +59,14 @@ simple-lms/
 ├── api/                      # App REST API
 │   ├── schemas.py            # Pydantic schemas (validasi input/output)
 │   ├── helpers.py            # Helper functions untuk authorization checks
-│   ├── main.py               # NinjaAPI instance + router registration
+│   ├── main.py               # NinjaAPI instance + router registration + rate limiting
+│   ├── tasks.py              # Celery tasks (email, certificate, stats, report)
+│   ├── mongodb_service.py    # Service layer MongoDB (activity log & analytics)
 │   └── routers/
-│       ├── auth_router.py    # /api/register/, /api/me/
-│       ├── course_router.py  # /api/courses/* endpoints
-│       └── enrollment_router.py  # /api/enrollments/* endpoints
+│       ├── auth_router.py        # /api/register/, /api/me/
+│       ├── course_router.py      # /api/courses/* endpoints (dengan Redis cache)
+│       ├── enrollment_router.py  # /api/enrollments/* endpoints
+│       └── analytics_router.py   # /api/analytics/* endpoints (MongoDB)
 ├── scripts/
 │   ├── seed_data.py          # Script seed data awal
 │   ├── seed_lab.py           # Script seed data skala besar (100+ course)
@@ -344,13 +354,127 @@ check_enrollment(user, course)         # 403 jika tidak enrolled
 | 5 | Aksi yang diizinkan | `POST /api/courses` | 201 Created |
 | 6 | Aksi yang ditolak | `PUT /api/courses/{id_milik_orang_lain}` | 403 Forbidden |
 
+---
+
+## Progres 6 — Advanced Features & Integration (Chapter 11, 12, 13)
+
+Integrasi layanan tambahan: Redis Caching, Rate Limiting, MongoDB Activity Logs, Celery Background Tasks, dan Flower Monitoring.
+
+### Arsitektur Lengkap
+
+```
+                    Browser / Postman
+                          │
+                          ▼
+                   Django Web + API
+                    (Port 8000)
+                 /api/docs (Swagger)
+                          │
+          ┌───────────────┼───────────────┐
+          │               │               │
+          ▼               ▼               ▼
+      PostgreSQL        Redis           MongoDB
+   (data utama)     (cache+session)  (activity logs)
+       :5432            :6379            :27017
+                          │
+                          ▼
+                    django-redis
+                    Cache-Aside
+                    Rate Limiting
+                          │
+                          ▼
+                       RabbitMQ
+                    (message broker)
+                       :5672/:15672
+                          │
+                 ┌────────┴────────┐
+                 ▼                 ▼
+          Celery Worker      Celery Beat
+          (background)      (scheduler)
+                 │
+                 ▼
+            Flower UI
+            (monitoring)
+              :5555
+```
+
+### 8 Services yang Berjalan
+
+| Service | Port | Fungsi |
+|---|---|---|
+| `web` | 8000 | Django app |
+| `db` | 5432 | PostgreSQL |
+| `redis` | 6379 | Cache + Result backend Celery |
+| `mongodb` | 27017 | Activity logs & analytics |
+| `rabbitmq` | 5672 / 15672 | Message broker |
+| `celery_worker` | — | Background task processing |
+| `celery_beat` | — | Periodic task scheduler |
+| `flower` | 5555 | Celery monitoring dashboard |
+
+### Redis Caching (Chapter 11 — Cache-Aside Pattern)
+
+Course list dan detail di-cache selama **5 menit (300 detik)** di Redis DB 1. Cache diinvalidasi otomatis saat ada operasi create/update/delete.
+
+| Cache Key | TTL | Invalidasi |
+|---|---|---|
+| `course_list:p{page}:ps{size}:...` | 300s | Saat create/update/delete course |
+| `course_detail:{id}` | 300s | Saat update/delete course tersebut |
+
+### Rate Limiting (60 req/menit)
+
+Diimplementasikan via Django Ninja Throttling:
+
+| User Type | Limit |
+|---|---|
+| Anonim (tidak login) | 20 request/menit |
+| Authenticated | 60 request/menit |
+
+Response saat melebihi limit: **`429 Too Many Requests`**
+
+### MongoDB Activity Logs (Chapter 12)
+
+Setiap aksi penting dicatat ke collection `activity_logs` di MongoDB database `lms_analytics`:
+
+| Endpoint Analytics | Deskripsi |
+|---|---|
+| `POST /api/analytics/log/` | Catat aktivitas manual |
+| `GET /api/analytics/my-activity/` | 10 aktivitas terbaru user |
+| `GET /api/analytics/popular-courses/` | Top course terpopuler (aggregation pipeline) |
+| `GET /api/analytics/daily-summary/` | Ringkasan aktivitas harian |
+
+### Celery Background Tasks (Chapter 13)
+
+4 task wajib yang berjalan secara asynchronous:
+
+| Task | Trigger | Fungsi |
+|---|---|---|
+| `send_enrollment_email` | Saat user enroll ke course | Kirim email konfirmasi (async) |
+| `generate_certificate` | Saat semua lesson selesai | Generate sertifikat penyelesaian |
+| `update_course_statistics` | Setiap tengah malam (Celery Beat) | Update statistik course ke MongoDB |
+| `export_course_report` | Request dari instructor | Generate CSV laporan enrollment |
+
+Endpoint cek status task: `GET /api/enrollments/tasks/{task_id}/status`
+
+### Screenshots
+
+#### Flower Workers — Celery Worker Online
+![Flower Workers](Screenshot/Progress_4/1.png)
+
+#### RabbitMQ Management — Queues (default, emails, reports)
+![RabbitMQ Queues](Screenshot/Progress_4/2.png)
+
+#### Docker Compose PS — Semua Service Up
+![Docker Compose PS](Screenshot/Progress_4/3.png)
+
+#### Rate Limiting Test (429) + Redis CLI Cache Keys
+![Rate Limiting dan Redis CLI](Screenshot/Progress_4/4.png)
 
 ---
 
 ## Prerequisites
 
 - Docker Desktop terinstall dan berjalan
-- Port 8000 tidak digunakan aplikasi lain
+- Port 8000, 5432, 6379, 27017, 5672, 15672, 5555 tidak digunakan aplikasi lain
 
 ## Cara Menjalankan
 
@@ -368,23 +492,23 @@ cp .env.example .env
 # Edit .env sesuai kebutuhan
 ```
 
-### 3. Jalankan Docker Compose
+### 3. Generate RSA Keys (sekali saja)
+
+```bash
+docker compose run --rm web python manage.py make_rsa
+```
+
+### 4. Jalankan Semua Services
 
 ```bash
 docker compose up -d
 ```
 
-### 4. Jalankan Migrasi Database
+### 5. Jalankan Migrasi Database
 
 ```bash
 docker compose exec web python manage.py makemigrations courses
 docker compose exec web python manage.py migrate
-```
-
-### 5. Generate RSA Keys (sekali saja)
-
-```bash
-docker compose exec web python manage.py make_rsa
 ```
 
 ### 6. Buat Superuser
@@ -410,6 +534,8 @@ docker compose exec web python scripts/seed_lab.py
 | `http://localhost:8000/admin` | Django Admin |
 | `http://localhost:8000/api/docs` | Swagger UI — REST API Documentation |
 | `http://localhost:8000/silk/` | Django Silk profiling dashboard |
+| `http://localhost:5555` | Flower — Celery monitoring |
+| `http://localhost:15672` | RabbitMQ Management UI (admin/rabbit_password_2024) |
 | `http://localhost:8000/lab/course-list/baseline/` | Endpoint baseline skenario 1 |
 | `http://localhost:8000/lab/course-list/optimized/` | Endpoint optimized skenario 1 |
 | `http://localhost:8000/lab/course-members/baseline/` | Endpoint baseline skenario 2 |
@@ -420,14 +546,25 @@ docker compose exec web python scripts/seed_lab.py
 ### Perintah Berguna
 
 ```bash
-# Lihat status container
+# Lihat status semua container
 docker compose ps
 
 # Lihat logs
 docker compose logs -f web
+docker compose logs -f celery_worker
 
 # Masuk ke shell Django
 docker compose exec web python manage.py shell
+
+# Verifikasi Redis cache
+docker compose exec redis redis-cli
+> SELECT 1
+> KEYS *
+
+# Verifikasi MongoDB logs
+docker compose exec mongodb mongosh -u admin -p mongo_password_2024
+> use lms_analytics
+> db.activity_logs.find().limit(3)
 
 # Jalankan demo query optimization
 docker compose exec web python scripts/query_demo.py
@@ -454,6 +591,10 @@ docker compose down -v
 | `DB_PASSWORD` | Password database | string kuat |
 | `DB_HOST` | Hostname database | `db` (nama service Docker) |
 | `DB_PORT` | Port database | `5432` |
+| `MONGODB_URI` | URI koneksi MongoDB | `mongodb://admin:pass@mongodb:27017/` |
+| `MONGODB_DB` | Nama database MongoDB | `lms_analytics` |
+| `CELERY_BROKER_URL` | URL RabbitMQ broker | `amqp://admin:pass@rabbitmq:5672//` |
+| `CELERY_RESULT_BACKEND` | URL Redis result backend | `redis://redis:6379/2` |
 
 ---
 

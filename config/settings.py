@@ -32,6 +32,9 @@ ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='localhost').split(',')
 
 # Application definition
 
+# ─────────────────────────────────────────────────────────────
+# INSTALLED APPS — tambahkan
+# ─────────────────────────────────────────────────────────────
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -42,8 +45,65 @@ INSTALLED_APPS = [
     'courses',
     'silk',
     'api',
-    'ninja_simple_jwt',    # ← TAMBAHKAN INI (gantikan konfigurasi JWT manual)
+    'ninja_simple_jwt',
 ]
+
+# ─────────────────────────────────────────────────────────────
+# REDIS CACHE — sesuai Chapter 11
+# ─────────────────────────────────────────────────────────────
+CACHES = {
+    "default": {
+        "BACKEND": "django_redis.cache.RedisCache",
+        "LOCATION": "redis://redis:6379/1",
+        "OPTIONS": {
+            "CLIENT_CLASS": "django_redis.client.DefaultClient",
+        },
+        "KEY_PREFIX": "simple_lms",
+        "TIMEOUT": 300,  # Default TTL: 5 menit
+    }
+}
+
+# ─────────────────────────────────────────────────────────────
+# THROTTLING — pakai cache default (Redis) untuk rate limiting
+# ─────────────────────────────────────────────────────────────
+NINJA_THROTTLE_CACHE_KEY_PREFIX = "throttle"
+NINJA_THROTTLE_CACHE_BACKEND = "default"
+
+# Session pakai Redis (sesuai Chapter 11)
+SESSION_ENGINE = "django.contrib.sessions.backends.cache"
+SESSION_CACHE_ALIAS = "default"
+
+# ─────────────────────────────────────────────────────────────
+# MONGODB — sesuai Chapter 12
+# ─────────────────────────────────────────────────────────────
+MONGODB_URI = config('MONGODB_URI', default='mongodb://admin:mongo_password_2024@mongodb:27017/')
+MONGODB_DB = config('MONGODB_DB', default='lms_analytics')
+
+# ─────────────────────────────────────────────────────────────
+# CELERY — sesuai Chapter 13
+# ─────────────────────────────────────────────────────────────
+CELERY_BROKER_URL = config(
+    'CELERY_BROKER_URL',
+    default='amqp://admin:rabbit_password_2024@rabbitmq:5672//'
+)
+CELERY_RESULT_BACKEND = config(
+    'CELERY_RESULT_BACKEND',
+    default='redis://redis:6379/2'
+)
+CELERY_ACCEPT_CONTENT = ['json']
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_RESULT_SERIALIZER = 'json'
+CELERY_TIMEZONE = 'Asia/Jakarta'
+
+# Periodic task schedule (Celery Beat)
+from celery.schedules import crontab
+
+CELERY_BEAT_SCHEDULE = {
+    'update-course-statistics': {
+        'task': 'api.tasks.update_course_statistics',
+        'schedule': crontab(hour=0, minute=0),  # Setiap tengah malam
+    },
+}
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',

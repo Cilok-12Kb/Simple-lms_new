@@ -1,32 +1,32 @@
 """
 api/routers/course_router.py
-Course endpoints dengan authentication & authorization.
-
-Sesuai Chapter 7:
-- Section 6: Protecting Endpoints (auth=apiAuth)
-- Section 7.6: Authorization CRUD Course
+Course endpoints dengan Redis Caching (Chapter 11 Cache-Aside Pattern).
 """
 from typing import Optional, List
+from django.core.cache import cache, caches
 from django.contrib.auth import get_user_model
 from django.utils.text import slugify
 from ninja import Router, Query
 from ninja.errors import HttpError
+from ninja.throttling import AnonRateThrottle
 
 from courses.models import Course, Category
 from api.schemas import CourseOut, CourseIn, CourseUpdateSchema, MessageOut
-from api.helpers import (
-    get_authenticated_user,
-    check_course_owner,
-    check_owner_or_superadmin,
-)
+from api.helpers import get_authenticated_user, check_course_owner, check_owner_or_superadmin
 
 User = get_user_model()
 router = Router(tags=['Courses'])
 
+# TTL cache untuk course
+COURSE_LIST_TTL = 300   # 5 menit
+COURSE_DETAIL_TTL = 300  # 5 menit
+
 
 # ─────────────────────────────────────────────────────────────
-# PUBLIC ENDPOINTS — tidak butuh token
+# RATE LIMITING — 60 req/menit, tersimpan di Redis
+# Sesuai requirement: Rate limiting (60 requests/minute)
 # ─────────────────────────────────────────────────────────────
+
 
 @router.get('', response=List[CourseOut])
 def list_courses(
@@ -35,57 +35,77 @@ def list_courses(
     page_size: int = Query(10),
     search: Optional[str] = Query(None),
     level: Optional[str] = Query(None),
+    ordering: str = Query('-created_at'),
 ):
     """
-    List semua course yang published — PUBLIK, tidak butuh token.
+    List course dengan Cache-Aside Pattern (sesuai Chapter 11 Section 7.1).
+
+    Cache key unik berdasarkan semua parameter filter,
+    agar tiap kombinasi filter punya cache sendiri.
     """
     from django.db.models import Count
 
+    # Buat cache key yang mencerminkan semua parameter
+    cache_key = f"course_list:p{page}:ps{page_size}:s{search}:l{level}:o{ordering}"
+
+    # ── 1. Cek cache ──────────────────────────────────────────
+    cached = cache.get(cache_key)
+    if cached is not None:
+        return cached  # Cache HIT — langsung return
+
+    # ── 2. Cache MISS — query database ───────────────────────
+    page_size = min(page_size, 50)
     qs = Course.objects.filter(is_published=True).select_related(
         'instructor', 'category'
     )
-
     if search:
         qs = qs.filter(title__icontains=search)
     if level:
         qs = qs.filter(level=level)
 
-    page_size = min(page_size, 50)
+    allowed_orderings = ['created_at', '-created_at', 'price', '-price', 'title', '-title']
+    if ordering in allowed_orderings:
+        qs = qs.order_by(ordering)
+
     offset = (page - 1) * page_size
-    return list(qs[offset:offset + page_size])
+    courses = list(qs[offset:offset + page_size])
+
+    # ── 3. Simpan ke cache ───────────────────────────────────
+    cache.set(cache_key, courses, timeout=COURSE_LIST_TTL)
+    return courses
 
 
 @router.get('/{course_id}', response={200: CourseOut, 404: MessageOut})
 def get_course(request, course_id: int):
-    """Detail course — PUBLIK."""
+    """
+    Detail course dengan Cache-Aside Pattern.
+    Cache key: 'course_detail:{id}'
+    """
+    cache_key = f"course_detail:{course_id}"
+
+    # ── 1. Cek cache ──────────────────────────────────────────
+    cached = cache.get(cache_key)
+    if cached is not None:
+        return cached
+
+    # ── 2. Cache MISS ─────────────────────────────────────────
     try:
-        return Course.objects.select_related(
+        course = Course.objects.select_related(
             'instructor', 'category'
         ).get(id=course_id, is_published=True)
     except Course.DoesNotExist:
         raise HttpError(404, "Course tidak ditemukan")
 
+    # ── 3. Simpan ke cache ───────────────────────────────────
+    cache.set(cache_key, course, timeout=COURSE_DETAIL_TTL)
+    return course
 
-# ─────────────────────────────────────────────────────────────
-# PROTECTED ENDPOINTS — butuh token (auth=apiAuth)
-# ─────────────────────────────────────────────────────────────
 
-@router.post('', auth=True, response={201: CourseOut, 400: MessageOut, 403: MessageOut})
+@router.post('', auth=True, response={201: CourseOut, 400: MessageOut})
 def create_course(request, data: CourseIn):
-    """
-    Buat course baru.
-
-    Sesuai Chapter 7 Section 7.6:
-    - Membutuhkan: Authorization: Bearer <access_token>
-    - User yang membuat otomatis jadi instructor/owner course
-    - Semua authenticated user bisa buat course (jadi instructor)
-
-    request.user tersedia karena auth=True
-    """
-    # Ambil user dari token — sesuai Chapter 7 Section 6.2
+    """Buat course baru + invalidasi cache list."""
     user = get_authenticated_user(request)
 
-    # Generate slug unik dari title
     base_slug = slugify(data.title)
     slug = base_slug
     counter = 1
@@ -97,10 +117,26 @@ def create_course(request, data: CourseIn):
         title=data.title,
         slug=slug,
         description=data.description,
-        instructor=user,     # User yang membuat = instructor
+        instructor=user,
         level=data.level,
         price=data.price,
-        is_published=False,  # Default: draft
+        is_published=False,
+    )
+
+    # ── Write-Through: Invalidasi cache list (Chapter 11 Section 7.2) ──
+    # Hapus semua cache course_list karena ada data baru
+    from django_redis import get_redis_connection
+    redis_conn = get_redis_connection("default")
+    keys = redis_conn.keys("*course_list*")
+    if keys:
+        redis_conn.delete(*keys)
+
+    # Trigger Celery task: log activity ke MongoDB
+    from api.tasks import log_activity_task
+    log_activity_task.delay(
+        user_id=user.id,
+        action='create_course',
+        course_name=course.title,
     )
 
     return 201, course
@@ -108,77 +144,70 @@ def create_course(request, data: CourseIn):
 
 @router.put('/{course_id}', auth=True, response={200: CourseOut, 403: MessageOut, 404: MessageOut})
 def update_course(request, course_id: int, data: CourseIn):
-    """
-    Update course.
-
-    Sesuai Chapter 7 Section 7.6:
-    Authorization: hanya course OWNER yang boleh edit.
-    → HttpError(403) jika bukan owner.
-    """
+    """Update course + invalidasi cache."""
     user = get_authenticated_user(request)
-
-    course = Course.objects.filter(id=course_id).first()
-    if course is None:
-        raise HttpError(404, "Course tidak ditemukan")
-
-    # Authorization check — sesuai Chapter 7 Section 7.6
-    check_course_owner(course, user)  # Raise 403 otomatis jika bukan owner
-
-    course.title = data.title
-    course.description = data.description
-    course.level = data.level
-    course.price = data.price
-    course.save()
-    return course
-
-
-@router.patch('/{course_id}', auth=True, response={200: CourseOut, 403: MessageOut, 404: MessageOut})
-def partial_update_course(request, course_id: int, data: CourseUpdateSchema):
-    """
-    Update sebagian field course (partial update).
-    Authorization: hanya owner atau superadmin.
-    """
-    user = get_authenticated_user(request)
-
     course = Course.objects.filter(id=course_id).first()
     if course is None:
         raise HttpError(404, "Course tidak ditemukan")
 
     check_course_owner(course, user)
 
-    if data.title is not None:
-        course.title = data.title
-    if data.description is not None:
-        course.description = data.description
-    if data.level is not None:
-        course.level = data.level
-    if data.price is not None:
-        course.price = data.price
-    if data.is_published is not None:
-        course.is_published = data.is_published
-
+    course.title = data.title
+    course.description = data.description
+    course.level = data.level
+    course.price = data.price
     course.save()
+
+    # Invalidasi cache list DAN detail
+    from django_redis import get_redis_connection
+    redis_conn = get_redis_connection("default")
+    keys = redis_conn.keys("*course_list*")
+    if keys:
+        redis_conn.delete(*keys)
+    cache.delete(f"course_detail:{course_id}")
+
     return course
 
 
 @router.delete('/{course_id}', auth=True, response={200: MessageOut, 403: MessageOut, 404: MessageOut})
 def delete_course(request, course_id: int):
-    """
-    Hapus course.
-
-    Sesuai Chapter 7 Section 7.6:
-    Authorization: course OWNER atau SUPERADMIN.
-    → HttpError(403) jika tidak memenuhi keduanya.
-    """
+    """Hapus course + invalidasi cache."""
     user = get_authenticated_user(request)
-
     course = Course.objects.filter(id=course_id).first()
     if course is None:
         raise HttpError(404, "Course tidak ditemukan")
 
-    # Authorization: owner ATAU superadmin — sesuai Chapter 7 Section 7.6
     check_owner_or_superadmin(course.instructor, user)
-
     title = course.title
     course.delete()
+
+    # Invalidasi semua cache terkait
+    from django_redis import get_redis_connection
+    redis_conn = get_redis_connection("default")
+    keys = redis_conn.keys("*course_list*")
+    if keys:
+        redis_conn.delete(*keys)
+    cache.delete(f"course_detail:{course_id}")
+
     return MessageOut(message=f"Course '{title}' berhasil dihapus")
+
+
+@router.post('/{course_id}/export-report', auth=True, response={202: dict})
+def export_report(request, course_id: int):
+    """
+    Generate laporan CSV course secara async (Task 4).
+    """
+    from api.tasks import export_course_report
+    user = get_authenticated_user(request)
+    course = Course.objects.filter(id=course_id).first()
+    if course is None:
+        raise HttpError(404, "Course tidak ditemukan")
+
+    check_course_owner(course, user)
+
+    task = export_course_report.delay(course_id, user.id)
+    return 202, {
+        "task_id": task.id,
+        "status": "processing",
+        "message": "Laporan sedang digenerate. Cek status via /enrollments/tasks/{task_id}/status/"
+    }

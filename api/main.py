@@ -7,10 +7,25 @@ from ninja import NinjaAPI
 from ninja.errors import HttpError, ValidationError
 from ninja_simple_jwt.auth.views.api import mobile_auth_router
 from ninja_simple_jwt.auth.ninja_auth import HttpJwtAuth
+from ninja.throttling import AnonRateThrottle, AuthRateThrottle
 
 from api.routers.course_router import router as course_router
 from api.routers.enrollment_router import router as enrollment_router
 from api.routers.auth_router import router as auth_router
+from api.routers.analytics_router import router as analytics_router
+
+# ─────────────────────────────────────────────────────────────
+# RATE LIMITING (Chapter 9 Section 5.4)
+# ─────────────────────────────────────────────────────────────
+from django.core.cache import caches
+
+class AnonThrottle(AnonRateThrottle):
+    def __init__(self):
+        super().__init__(rate="60/minute")
+
+class AuthThrottle(AuthRateThrottle):
+    def __init__(self):
+        super().__init__(rate="60/minute")
 
 # ─────────────────────────────────────────────────────────────
 # INISIALISASI NINJA API
@@ -36,30 +51,22 @@ apiv1 = NinjaAPI(
     ''',
     docs_url='/docs',
     openapi_url='/openapi.json',
+    throttle=[AnonThrottle(), AuthThrottle()],
 )
 
 # ─────────────────────────────────────────────────────────────
-# JWT AUTH HANDLER — dipakai sebagai auth= di setiap endpoint
+# JWT AUTH HANDLER
 # ─────────────────────────────────────────────────────────────
-# Ini adalah objek yang dibaca oleh ninja-simple-jwt
-# untuk memvalidasi token RSA di header Authorization
 apiAuth = HttpJwtAuth()
 
 # ─────────────────────────────────────────────────────────────
 # REGISTER ROUTERS
 # ─────────────────────────────────────────────────────────────
-
-# Auth router dari ninja-simple-jwt:
-# Otomatis menyediakan:
-#   POST /api/auth/sign-in       → login, dapat access + refresh token
-#   POST /api/auth/token-refresh → refresh access token
 apiv1.add_router('/auth/', mobile_auth_router)
-
-# Router custom kita:
-apiv1.add_router('/', auth_router)          # register, me, update profile
 apiv1.add_router('/courses/', course_router)
 apiv1.add_router('/enrollments/', enrollment_router)
-
+apiv1.add_router('/', auth_router)
+apiv1.add_router('/analytics/', analytics_router)  # ← dipindah ke sini
 
 # ─────────────────────────────────────────────────────────────
 # CUSTOM ERROR HANDLERS

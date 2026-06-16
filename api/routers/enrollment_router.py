@@ -19,41 +19,48 @@ from api.schemas import (
     ProgressOut, MessageOut,
 )
 from api.helpers import get_authenticated_user, check_enrollment
+from celery.result import AsyncResult
 
 User = get_user_model()
 router = Router(tags=['Enrollments'])
 
 
-@router.post('', auth=True, response={201: EnrollmentOut, 400: MessageOut, 404: MessageOut})
+@router.post('', auth=True, response={201: EnrollmentOut, 400: MessageOut})
 def enroll_course(request, data: EnrollSchema):
     """
     Daftar ke course.
-
-    Sesuai Chapter 7 Section 6.3:
-    - auth=True: butuh token
-    - Cek duplikasi enrollment sebelum create
-
-    Catatan: di chapter 7, semua authenticated user bisa enroll.
-    Tidak dibatasi role 'student' saja.
+    Setelah enroll → trigger Celery task kirim email (async).
     """
-    # Sesuai Chapter 7: user dari request.user
     user = get_authenticated_user(request)
 
-    try:
-        course = Course.objects.select_related(
-            'instructor', 'category'
-        ).get(id=data.course_id, is_published=True)
-    except Course.DoesNotExist:
-        raise HttpError(404, "Course tidak ditemukan atau belum dipublikasikan")
+    if not user.is_student:
+        raise HttpError(403, "Hanya student yang bisa mendaftar ke course")
 
-    # Cek sudah terdaftar — sesuai Chapter 7 Section 6.3
+    try:
+        course = Course.objects.select_related('instructor', 'category').get(
+            id=data.course_id, is_published=True
+        )
+    except Course.DoesNotExist:
+        raise HttpError(404, "Course tidak ditemukan")
+
     if Enrollment.objects.filter(student=user, course=course).exists():
-        raise HttpError(400, f"Anda sudah terdaftar di course '{course.title}'")
+        raise HttpError(400, "Kamu sudah terdaftar di course ini")
 
     enrollment = Enrollment.objects.create(
-        student=user,
-        course=course,
-        status='active',
+        student=user, course=course, status='active'
+    )
+
+    # ── Trigger Tasks (async, user tidak perlu menunggu) ─────
+    from api.tasks import send_enrollment_email, log_activity_task
+
+    # Task 1: Kirim email di background
+    send_enrollment_email.delay(user.id, course.id)
+
+    # Task 2: Log aktivitas ke MongoDB
+    log_activity_task.delay(
+        user_id=user.id,
+        action='enroll',
+        course_name=course.title,
     )
 
     return 201, enrollment
@@ -123,3 +130,32 @@ def update_progress(request, enrollment_id: int, data: ProgressUpdateSchema):
         completed_at=progress.completed_at,
         last_position_seconds=progress.last_position_seconds,
     )
+
+@router.post('/{enrollment_id}/generate-certificate', auth=True, response={202: dict})
+def request_certificate(request, enrollment_id: int):
+    """
+    Request generate sertifikat secara async.
+    Response 202 Accepted — proses berjalan di background.
+    """
+    from api.tasks import generate_certificate
+    user = get_authenticated_user(request)
+    enrollment = Enrollment.objects.filter(id=enrollment_id, student=user).first()
+    if enrollment is None:
+        raise HttpError(404, "Enrollment tidak ditemukan")
+
+    task = generate_certificate.delay(user.id, enrollment.course.id)
+    return 202, {
+        "task_id": task.id,
+        "status": "processing",
+        "message": "Sertifikat sedang digenerate. Cek status via /tasks/{task_id}/status/"
+    }
+
+
+@router.get('/tasks/{task_id}/status', auth=True, response=dict)
+def check_task_status(request, task_id: str):
+    """Cek status dan hasil Celery task."""
+    result = AsyncResult(task_id)
+    response = {"task_id": task_id, "status": result.status}
+    if result.ready():
+        response["result"] = result.result
+    return response
